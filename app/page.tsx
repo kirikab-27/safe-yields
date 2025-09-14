@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { Protocol, FilterOptions } from '@/types/protocol';
+import HeroSection from '@/components/HeroSection';
+import SearchFilters from '@/components/SearchFilters';
 import ProtocolCard from '@/components/ProtocolCard';
-import FilterBar from '@/components/FilterBar';
-import SearchBar from '@/components/SearchBar';
 import EmailCapture from '@/components/EmailCapture';
 import protocolsData from '@/data/protocols.json';
 
@@ -42,13 +42,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* ヘッダー */}
-      <header className="border-b border-green-900/20 bg-black/50 backdrop-blur sticky top-0 z-50">
+      <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🛡️</span>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
-                Safe Yields
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🛡️</span>
+              <h1 className="text-2xl font-bold">
+                <span className="text-white">Safe</span>
+                <span className="text-green-400"> Yields</span>
               </h1>
             </div>
             <p className="text-xs text-gray-500 hidden sm:block">
@@ -59,64 +60,43 @@ export default function Home() {
       </header>
 
       {/* ヒーローセクション */}
-      <section className="bg-gradient-to-b from-green-900/10 to-transparent">
-        <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Find Safe DeFi Yields.{" "}
-            <span className="text-green-400">Skip the Scams.</span>
-          </h2>
-          <p className="text-gray-400 text-lg mb-8">
-            Verified protocols only. Real APYs. Safety scores. No BS.
-          </p>
-
-          {/* 統計 */}
-          <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
-              <div className="text-2xl font-bold text-green-400">{stats.protocolCount}</div>
-              <div className="text-xs text-gray-500">Verified Protocols</div>
-            </div>
-            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
-              <div className="text-2xl font-bold">${stats.totalTVL}B</div>
-              <div className="text-xs text-gray-500">Total TVL</div>
-            </div>
-            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
-              <div className="text-2xl font-bold text-yellow-400">{stats.avgAPY}%</div>
-              <div className="text-xs text-gray-500">Avg Safe APY</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection stats={stats} />
 
       {/* 検索・フィルター */}
-      <section className="max-w-7xl mx-auto px-4 py-6">
-        <SearchBar value={filters.searchQuery} onChange={(value) => setFilters({...filters, searchQuery: value})} />
-        <FilterBar filters={filters} onChange={setFilters} />
-      </section>
+      <SearchFilters filters={filters} onChange={setFilters} />
 
       {/* プロトコルリスト */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid gap-4">
+      <main className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid gap-6">
           {filteredProtocols.map((protocol) => (
             <ProtocolCard key={protocol.id} protocol={protocol} />
           ))}
         </div>
 
         {filteredProtocols.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No protocols found matching your criteria.
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🔍</div>
+            <div className="text-xl text-gray-400">No protocols found matching your criteria.</div>
+            <div className="text-sm text-gray-500 mt-2">Try adjusting your filters</div>
           </div>
         )}
       </main>
 
       {/* メール収集 */}
-      <EmailCapture />
+      <section className="border-t border-gray-800 bg-gradient-to-b from-transparent to-green-950/10">
+        <EmailCapture />
+      </section>
 
       {/* フッター */}
-      <footer className="border-t border-gray-800 mt-20">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-sm text-gray-500">
-            <p>© 2025 Safe Yields. Not financial advice.</p>
-            <p className="mt-2">Always do your own research.</p>
+      <footer className="border-t border-gray-800 bg-black">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-2xl">🛡️</span>
+              <span className="text-lg font-bold">Safe Yields</span>
+            </div>
+            <p className="text-sm text-gray-500">© 2025 Safe Yields. Not financial advice.</p>
+            <p className="text-xs text-gray-600 mt-2">Always do your own research before investing.</p>
           </div>
         </div>
       </footer>
