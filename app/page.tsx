@@ -5,6 +5,7 @@ import { Protocol, FilterOptions } from '@/types/protocol';
 import HeroSection from '@/components/HeroSection';
 import SearchFilters from '@/components/SearchFilters';
 import ProtocolCard from '@/components/ProtocolCard';
+import LidoCard from '@/components/LidoCard';
 import EmailCapture from '@/components/EmailCapture';
 import protocolsData from '@/data/protocols.json';
 
@@ -52,9 +53,17 @@ export default function Home() {
                 <span className="text-green-400"> Yields</span>
               </h1>
             </div>
-            <p className="text-xs text-gray-500 hidden sm:block">
-              Not Financial Advice. Always DYOR.
-            </p>
+            <div className="flex items-center gap-4">
+              <a
+                href="/test-api"
+                className="text-xs text-green-400 hover:text-green-300 transition-colors"
+              >
+                🧪 API Test
+              </a>
+              <p className="text-xs text-gray-500 hidden sm:block">
+                Not Financial Advice. Always DYOR.
+              </p>
+            </div>
           </div>
         </div>
       </header>
@@ -68,9 +77,16 @@ export default function Home() {
       {/* プロトコルリスト */}
       <main className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid gap-6">
-          {filteredProtocols.map((protocol) => (
-            <ProtocolCard key={protocol.id} protocol={protocol} />
-          ))}
+          {filteredProtocols.map((protocol) => {
+            // Lidoだけリアルタイムデータを使用
+            const isLido = protocol.name === 'Lido';
+
+            return isLido ? (
+              <LidoCard key={protocol.id} />
+            ) : (
+              <ProtocolCard key={protocol.id} protocol={protocol} />
+            );
+          })}
         </div>
 
         {filteredProtocols.length === 0 && (
