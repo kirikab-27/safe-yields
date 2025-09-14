@@ -7,6 +7,7 @@ import SearchFilters from '@/components/SearchFilters';
 import ProtocolCard from '@/components/ProtocolCard';
 import LidoCard from '@/components/LidoCard';
 import RocketPoolCard from '@/components/RocketPoolCard';
+import AaveCard from '@/components/AaveCard';
 import EmailCapture from '@/components/EmailCapture';
 import protocolsData from '@/data/protocols.json';
 
@@ -79,14 +80,17 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid gap-6">
           {filteredProtocols.map((protocol) => {
-            // LidoとRocket Poolはリアルタイムデータを使用
+            // Lido、Rocket Pool、Aave V3はリアルタイムデータを使用
             const isLido = protocol.name === 'Lido';
             const isRocketPool = protocol.name === 'Rocket Pool';
+            const isAave = protocol.name === 'Aave V3';
 
             if (isLido) {
               return <LidoCard key={protocol.id} />;
             } else if (isRocketPool) {
               return <RocketPoolCard key={protocol.id} />;
+            } else if (isAave) {
+              return <AaveCard key={protocol.id} />;
             } else {
               return <ProtocolCard key={protocol.id} protocol={protocol} />;
             }
