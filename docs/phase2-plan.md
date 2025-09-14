@@ -1,225 +1,234 @@
-# Safe Yields - Phase 2 実装計画
+# Safe Yields - Phase 2.1 実装計画（現実的版）
 
-## 🎯 Phase 2の目標
-- **期間**: 1週間（2025年1月15日〜21日）
-- **目的**: リアルタイムデータ統合とユーザー体験向上
-- **優先順位**: API統合 > UI改善 > 新機能
+## 🎯 Phase 2.1の目標
 
-## 📊 API統合計画
+* **期間**: 2週間
+* **目的**: DeFiLlama APIを使用したリアルタイムデータ統合
+* **方針**: 段階的実装（1プロトコルずつ確実に）
 
-### 対象プロトコル（優先順位順）
-1. **Aave V3** - Lending
-   - The Graph API使用
-   - TVL、APY、借入率のリアルタイム取得
-   - マルチチェーン対応
+## 📊 対象プロトコル（実装順）
 
-2. **Uniswap V3** - DEX
-   - Uniswap Subgraph使用
-   - 流動性プール情報
-   - 24時間取引量
+### 優先度と複雑度
 
-3. **Compound V3** - Lending
-   - Compound API使用
-   - 供給/借入APY
-   - 清算リスク指標
+| 順序 | プロトコル       | カテゴリ    | 複雑度 | 理由           |
+| -- | ----------- | ------- | --- | ------------ |
+| 1  | Lido        | Staking | 低   | 単一APY、最もシンプル |
+| 2  | Rocket Pool | Staking | 低   | Lidoと同構造     |
+| 3  | Aave v3     | Lending | 中   | 複数アセット       |
+| 4  | Compound v3 | Lending | 中   | Aave類似       |
+| 5  | Curve       | DEX     | 高   | 複数プール        |
 
-4. **Curve Finance** - DEX/Yield
-   - Curve API使用
-   - プール利回り
-   - CRVリワード
+## 🛠️ 技術スタック
 
-5. **Lido** - Staking
-   - Lido API使用
-   - stETH APR
-   - バリデーター統計
+### API選定
 
-### データ取得戦略
-```typescript
-// API統合アーキテクチャ
-interface APIProvider {
-  fetchProtocolData(protocol: string): Promise<ProtocolData>;
-  getUpdateFrequency(): number; // ミリ秒
-  handleRateLimit(): void;
-}
+* **統一API**: DeFiLlama API (`https://api.llama.fi`)
+* **理由**: 全プロトコル対応、統一的インターフェース、無料
 
-// 実装予定
-class DeFiDataAggregator {
-  providers: Map<string, APIProvider>;
-  cache: DataCache;
-  fallback: StaticDataFallback;
-}
+### 主要エンドポイント
+
+```
+GET /protocol/{name}     # プロトコル基本情報
+GET /tvl/{protocol}      # TVL履歴
+GET /pools2              # Yield情報
 ```
 
-## 🏗️ 実装ロードマップ
+### キャッシュ戦略
 
-### Week 1: Days 1-2（API基盤）
-- [ ] APIクライアント基盤構築
-- [ ] データキャッシング実装
-- [ ] エラーハンドリング
-- [ ] レート制限対策
+```
+開発: メモリキャッシュ（5分）
+本番: Vercel KV または Redis（5分TTL）
+```
 
-### Week 1: Days 3-4（プロトコル統合）
-- [ ] Aave V3 API統合
-- [ ] Uniswap V3 API統合
-- [ ] データ正規化パイプライン
-- [ ] フォールバック機構
+## 📅 実装スケジュール
 
-### Week 1: Days 5-6（UI/UX改善）
-- [ ] リアルタイム更新インジケーター
-- [ ] データ鮮度表示
-- [ ] ローディング状態改善
-- [ ] エラー状態UI
+### Week 1: 基礎実装
 
-### Week 1: Day 7（テスト・最適化）
-- [ ] E2Eテスト
-- [ ] パフォーマンス最適化
-- [ ] 本番デプロイ
-- [ ] モニタリング設定
+#### Day 1-2（月・火）: Lido実装
 
-## 🛠️ 技術実装詳細
+* [ ] `/api/protocols/lido/route.ts` 作成
+* [ ] エラーハンドリング実装
+* [ ] 5分キャッシュ実装
+* [ ] UIコンポーネント更新
+* [ ] テスト（レート制限確認）
 
-### 1. API Routes設定
+#### Day 3（水）: Rocket Pool追加
+
+* [ ] Lidoコードを流用
+* [ ] `/api/protocols/rocket-pool/route.ts`
+* [ ] 両プロトコルの比較表示
+
+#### Day 4-5（木・金）: Aave v3実装
+
+* [ ] 複数アセット対応
+* [ ] 加重平均APY計算
+* [ ] Supply/Borrow APY分離
+
+### Week 2: 拡張と最適化
+
+#### Day 1-2（月・火）: Compound v3追加
+
+* [ ] Aaveと同様の実装
+* [ ] データ構造の統一化
+
+#### Day 3-4（水・木）: Curve追加
+
+* [ ] 複数プール対応
+* [ ] Stablecoinフィルター
+
+#### Day 5（金）: 最適化
+
+* [ ] バッチ取得実装
+* [ ] エラー率測定
+* [ ] パフォーマンス改善
+
+## 💻 実装詳細
+
+### 1. APIルート構造
+
 ```typescript
-// app/api/protocols/[protocol]/route.ts
+// app/api/protocols/[id]/route.ts
 export async function GET(
   request: Request,
-  { params }: { params: { protocol: string } }
+  { params }: { params: { id: string } }
 ) {
-  const data = await fetchProtocolData(params.protocol);
+  // キャッシュチェック
+  if (cache.has(params.id)) {
+    return NextResponse.json(cache.get(params.id));
+  }
+
+  // API取得
+  const data = await fetchProtocolData(params.id);
+  cache.set(params.id, data, TTL);
+
   return NextResponse.json(data);
 }
 ```
 
-### 2. データフェッチング戦略
-```typescript
-// lib/api/protocols.ts
-export async function fetchProtocolData(name: string) {
-  // キャッシュチェック
-  const cached = await cache.get(name);
-  if (cached && !isStale(cached)) return cached;
+### 2. データ取得関数
 
-  // APIフェッチ
-  try {
-    const data = await apiProvider.fetch(name);
-    await cache.set(name, data);
-    return data;
-  } catch (error) {
-    // フォールバック
-    return fallbackData.get(name);
-  }
+```typescript
+async function fetchProtocolData(id: string) {
+  const [protocol, yields] = await Promise.all([
+    fetch(`https://api.llama.fi/protocol/${id}`),
+    fetch(`https://api.llama.fi/pools2?project=${id}`)
+  ]);
+
+  return {
+    id,
+    tvl: protocol.tvl,
+    apy: calculateWeightedAPY(yields.data),
+    lastUpdated: Date.now()
+  };
 }
 ```
 
-### 3. リアルタイム更新
+### 3. クライアント実装
+
 ```typescript
 // hooks/useProtocolData.ts
-export function useProtocolData(protocol: string) {
-  const { data, error, isLoading } = useSWR(
-    `/api/protocols/${protocol}`,
+import useSWR from 'swr';
+
+export function useProtocolData(id: string) {
+  return useSWR(
+    `/api/protocols/${id}`,
     fetcher,
-    {
-      refreshInterval: 60000, // 1分ごと
-      revalidateOnFocus: true,
-    }
+    { refreshInterval: 60000 }
   );
-  return { data, error, isLoading };
 }
 ```
 
-## 📈 新機能追加計画
+## 🧩 型定義
 
-### Phase 2で追加する機能
-1. **ソート機能**
-   - APY降順/昇順
-   - TVL降順/昇順
-   - 安全性スコア順
+```typescript
+interface ProtocolData {
+  id: string;
+  name: string;
+  tvl: number;
+  apy?: number;        // Staking系
+  apyLend?: number;    // Lending系
+  apyBorrow?: number;  // Lending系
+  pools?: PoolData[];  // DEX系
+  lastUpdated: number;
+}
+```
 
-2. **詳細ビュー**
-   - プロトコル詳細ページ
-   - 履歴チャート
-   - 監査レポートリンク
+## ✅ 各段階の完了条件
 
-3. **ユーザー機能**
-   - お気に入り登録（LocalStorage）
-   - カスタムアラート設定
-   - ポートフォリオトラッキング
+### Lido完了条件
 
-4. **データ可視化**
-   - TVL推移グラフ
-   - APY比較チャート
-   - リスク分布図
+* [ ] APIからリアルタイムデータ取得
+* [ ] TVLとAPY表示
+* [ ] 5分キャッシュ動作
+* [ ] エラー時フォールバック
 
-## 🔧 インフラ改善
+### 全体完了条件
 
-### パフォーマンス最適化
-- Next.js ISR（Incremental Static Regeneration）
-- Edge Caching（Vercel Edge Functions）
-- 画像最適化（next/image）
-- バンドルサイズ削減
-
-### モニタリング
-- Vercel Analytics統合
-- エラートラッキング（Sentry検討）
-- APIレスポンスタイム監視
-- ユーザー行動分析
-
-## 📊 成功指標
-
-### 技術指標
-- [ ] API応答時間 < 500ms
-- [ ] キャッシュヒット率 > 80%
-- [ ] エラー率 < 1%
-- [ ] Lighthouse Score > 90
-
-### ビジネス指標
-- [ ] ページ滞在時間 +30%
-- [ ] リピート率 +50%
-- [ ] データ鮮度 < 5分
-- [ ] ユーザー満足度向上
+* [ ] 5プロトコル全て実装
+* [ ] エラー率 < 1%
+* [ ] レスポンス時間 < 500ms
+* [ ] キャッシュヒット率 > 80%
 
 ## 🚨 リスク管理
 
 ### 技術的リスク
-- **API制限**: レート制限対策とキャッシング
-- **データ不整合**: バリデーションとフォールバック
-- **パフォーマンス**: 段階的ローディングとページネーション
 
-### ビジネスリスク
-- **データ精度**: 複数ソースからのクロスバリデーション
-- **可用性**: 99.9%アップタイム目標
-- **スケーラビリティ**: Vercel自動スケーリング活用
+| リスク      | 対策                |
+| -------- | ----------------- |
+| APIレート制限 | 5分キャッシュ、リトライ機構    |
+| データ不整合   | バリデーション、フォールバック   |
+| API停止    | 静的データフォールバック      |
+| 想定外の型崩れ  | 型ガード、Zodでのバリデーション |
 
-## 📝 Phase 3への準備
+## 📈 監視・ログ
+
+* 重要なエラーはSentry等に送信
+* APIレスポンス時間を計測
+* フロント側でフェールセーフUI（例: 「データ取得失敗」表示）
+
+## ⚙️ 環境変数管理
+
+* `NEXT_PUBLIC_API_BASE_URL` を `.env` で管理
+* 本番/開発で切替可能にする
+
+## 📊 成功指標
+
+### 必須達成
+
+* API統合完了（5プロトコル）
+* エラー率 < 1%
+* データ更新頻度 5分以内
+
+### 努力目標
+
+* レスポンス時間 < 300ms
+* キャッシュヒット率 > 90%
+* 全プロトコル対応準備
+
+## 🚀 Phase 2.2への準備
 
 ### 検討事項
-- Supabaseデータベース統合
-- ユーザー認証（NextAuth.js）
-- 有料プラン機能
-- モバイルアプリ開発
-- 多言語対応
 
-### データソース拡張
-- CoinGecko API
-- DeFi Llama API
-- Chainlink Price Feeds
-- The Graph Protocol
+* 全プロトコル対応（100+）
+* バッチ処理最適化
+* Supabase/Prisma導入
+* 履歴データ保存
 
-## 🎯 アクションアイテム
+## 📝 Issue管理
 
-### 即実行
-1. API認証情報取得
-2. 開発環境セットアップ
-3. テストデータ準備
+```
+Issue #16: Lido API実装
+Issue #17: Rocket Pool追加
+Issue #18: Aave v3/Compound v3追加
+Issue #19: Curve追加
+Issue #20: 最適化とバッチ処理
+```
 
-### 1日目開始時
-1. feature/api-integrationブランチ作成
-2. API基盤コード実装
-3. 最初のAPIテスト
+## 🎯 今すぐ実行
 
-### 毎日のタスク
-- 進捗をGitHub Issuesで管理
-- 日次コミット
-- ステージング環境テスト
+1. Issue #16作成
+2. Lido APIテスト（curl）
+3. 開発環境準備
 
 ---
 
