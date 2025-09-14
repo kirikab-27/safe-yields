@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { Protocol, FilterOptions } from '@/types/protocol';
+import Hero from '@/components/Hero';
+import SearchFilters from '@/components/SearchFilters';
 import ProtocolCard from '@/components/ProtocolCard';
-import FilterBar from '@/components/FilterBar';
-import SearchBar from '@/components/SearchBar';
 import EmailCapture from '@/components/EmailCapture';
 import protocolsData from '@/data/protocols.json';
 
@@ -59,39 +59,10 @@ export default function Home() {
       </header>
 
       {/* ヒーローセクション */}
-      <section className="bg-gradient-to-b from-green-900/10 to-transparent">
-        <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Find Safe DeFi Yields.{" "}
-            <span className="text-green-400">Skip the Scams.</span>
-          </h2>
-          <p className="text-gray-400 text-lg mb-8">
-            Verified protocols only. Real APYs. Safety scores. No BS.
-          </p>
-
-          {/* 統計 */}
-          <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
-              <div className="text-2xl font-bold text-green-400">{stats.protocolCount}</div>
-              <div className="text-xs text-gray-500">Verified Protocols</div>
-            </div>
-            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
-              <div className="text-2xl font-bold">${stats.totalTVL}B</div>
-              <div className="text-xs text-gray-500">Total TVL</div>
-            </div>
-            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
-              <div className="text-2xl font-bold text-yellow-400">{stats.avgAPY}%</div>
-              <div className="text-xs text-gray-500">Avg Safe APY</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Hero stats={stats} />
 
       {/* 検索・フィルター */}
-      <section className="max-w-7xl mx-auto px-4 py-6">
-        <SearchBar value={filters.searchQuery} onChange={(value) => setFilters({...filters, searchQuery: value})} />
-        <FilterBar filters={filters} onChange={setFilters} />
-      </section>
+      <SearchFilters filters={filters} onChange={setFilters} />
 
       {/* プロトコルリスト */}
       <main className="max-w-7xl mx-auto px-4 py-8">
