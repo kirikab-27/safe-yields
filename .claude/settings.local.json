@@ -40,7 +40,10 @@
       "Bash(npx tsc:*)",
       "Bash(\"/c/Program Files/GitHub CLI/gh\" pr merge 9 --merge --delete-branch)",
       "Bash(npx:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" pr create --title \"🎨 [Issue #7] UI redesign with shadcn/ui and Figma-inspired components\" --body \"$(cat <<''EOF''\n## Summary\n- ✅ Successfully integrated shadcn/ui component library\n- ✅ Created new Hero component with dynamic statistics\n- ✅ Redesigned ProtocolCard with enhanced visual hierarchy\n- ✅ Created unified SearchFilters component\n- ✅ Applied Figma-inspired design system\n- ✅ All builds and tests passing\n\n## Changes\n\n### 1. shadcn/ui Setup\n- Initialized shadcn/ui with Tailwind v4\n- Added components: badge, progress, input, button\n- Configured dark theme optimized for DeFi\n\n### 2. New Components\n- **Hero.tsx**: Dynamic hero section with real-time stats\n- **SearchFilters.tsx**: Unified search and filter interface\n- **Updated ProtocolCard.tsx**: \n  - Protocol icons (emojis)\n  - Large APY display\n  - Safety score progress bar\n  - Risk level badges with color coding\n\n### 3. Design Improvements\n- Dark theme throughout (bg-black)\n- Green accent color (#10b981)\n- Card backgrounds: bg-gray-900/50\n- Hover effects with green glow\n- Responsive design for all screen sizes\n\n### 4. Code Quality\n- ✅ TypeScript compilation: No errors\n- ✅ npm run build: Successful\n- ✅ Excluded figma-reference from TypeScript checking\n- ✅ Removed deprecated components (SearchBar, FilterBar)\n\n## Visual Changes\n- Modern, professional DeFi aesthetic\n- Improved information hierarchy\n- Better visual feedback on interactions\n- Consistent spacing and typography\n\n## Test Results\n- ✅ Development server runs without errors\n- ✅ Production build completes successfully\n- ✅ All filters and search functionality working\n- ✅ Responsive design verified\n\nFixes #7\nEOF\n)\")",
+      "Bash(tree:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" project item-add 5 --owner kirikab-27 --url https://github.com/kirikab-27/safe-yields/issues/14)"
     ],
     "deny": [],
     "ask": []
