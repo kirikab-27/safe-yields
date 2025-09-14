@@ -1,102 +1,124 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useMemo } from 'react';
+import { Protocol, FilterOptions } from '@/types/protocol';
+import ProtocolCard from '@/components/ProtocolCard';
+import FilterBar from '@/components/FilterBar';
+import SearchBar from '@/components/SearchBar';
+import EmailCapture from '@/components/EmailCapture';
+import protocolsData from '@/data/protocols.json';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [protocols] = useState<Protocol[]>(protocolsData as Protocol[]);
+  const [filters, setFilters] = useState<FilterOptions>({
+    category: 'All',
+    chain: 'All',
+    risk: 'All',
+    searchQuery: ''
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // フィルター適用
+  const filteredProtocols = useMemo(() => {
+    return protocols.filter(protocol => {
+      if (filters.category !== 'All' && protocol.category !== filters.category) return false;
+      if (filters.chain !== 'All' && protocol.chain !== filters.chain) return false;
+      if (filters.risk !== 'All' && protocol.risk !== filters.risk) return false;
+      if (filters.searchQuery && !protocol.name.toLowerCase().includes(filters.searchQuery.toLowerCase())) return false;
+      return true;
+    });
+  }, [protocols, filters]);
+
+  // 統計計算
+  const stats = useMemo(() => {
+    const totalTVL = filteredProtocols.reduce((sum, p) => sum + p.tvlNumber, 0);
+    const avgAPY = filteredProtocols.reduce((sum, p) => sum + p.apyNumber, 0) / filteredProtocols.length || 0;
+    return {
+      protocolCount: filteredProtocols.length,
+      totalTVL: (totalTVL / 1000000000).toFixed(1),
+      avgAPY: avgAPY.toFixed(1)
+    };
+  }, [filteredProtocols]);
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* ヘッダー */}
+      <header className="border-b border-green-900/20 bg-black/50 backdrop-blur sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🛡️</span>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+                Safe Yields
+              </h1>
+            </div>
+            <p className="text-xs text-gray-500 hidden sm:block">
+              Not Financial Advice. Always DYOR.
+            </p>
+          </div>
         </div>
+      </header>
+
+      {/* ヒーローセクション */}
+      <section className="bg-gradient-to-b from-green-900/10 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            Find Safe DeFi Yields.{" "}
+            <span className="text-green-400">Skip the Scams.</span>
+          </h2>
+          <p className="text-gray-400 text-lg mb-8">
+            Verified protocols only. Real APYs. Safety scores. No BS.
+          </p>
+
+          {/* 統計 */}
+          <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
+              <div className="text-2xl font-bold text-green-400">{stats.protocolCount}</div>
+              <div className="text-xs text-gray-500">Verified Protocols</div>
+            </div>
+            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
+              <div className="text-2xl font-bold">${stats.totalTVL}B</div>
+              <div className="text-xs text-gray-500">Total TVL</div>
+            </div>
+            <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
+              <div className="text-2xl font-bold text-yellow-400">{stats.avgAPY}%</div>
+              <div className="text-xs text-gray-500">Avg Safe APY</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 検索・フィルター */}
+      <section className="max-w-7xl mx-auto px-4 py-6">
+        <SearchBar value={filters.searchQuery} onChange={(value) => setFilters({...filters, searchQuery: value})} />
+        <FilterBar filters={filters} onChange={setFilters} />
+      </section>
+
+      {/* プロトコルリスト */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid gap-4">
+          {filteredProtocols.map((protocol) => (
+            <ProtocolCard key={protocol.id} protocol={protocol} />
+          ))}
+        </div>
+
+        {filteredProtocols.length === 0 && (
+          <div className="text-center py-12 text-gray-500">
+            No protocols found matching your criteria.
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* メール収集 */}
+      <EmailCapture />
+
+      {/* フッター */}
+      <footer className="border-t border-gray-800 mt-20">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center text-sm text-gray-500">
+            <p>© 2025 Safe Yields. Not financial advice.</p>
+            <p className="mt-2">Always do your own research.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
