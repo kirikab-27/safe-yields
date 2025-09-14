@@ -20,19 +20,33 @@ export default function EmailCapture() {
   };
 
   return (
-    <section className="bg-gradient-to-t from-green-900/10 to-transparent mt-20">
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+    <section className="py-20 bg-black">
+      <div className="max-w-2xl mx-auto px-4 text-center">
+        {/* メールアイコンを追加 */}
+        <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+          <svg
+            className="w-10 h-10 text-green-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+
         <h2 className="text-3xl font-bold mb-4">
           Get Weekly Safety Reports
         </h2>
+
         <p className="text-gray-400 mb-8">
-          New safe yields, scam alerts, and protocol updates. No spam.
+          Stay updated on protocol safety scores, new audits, and risk alerts.
         </p>
 
-        <form onSubmit={handleSubmit} className="flex gap-2 max-w-md mx-auto">
+        <form onSubmit={handleSubmit} className="flex gap-4 max-w-md mx-auto">
           <input
             type="email"
-            placeholder="your@email.com"
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:border-green-500 focus:outline-none text-white placeholder-gray-500"
