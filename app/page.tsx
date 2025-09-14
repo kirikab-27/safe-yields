@@ -6,6 +6,7 @@ import HeroSection from '@/components/HeroSection';
 import SearchFilters from '@/components/SearchFilters';
 import ProtocolCard from '@/components/ProtocolCard';
 import LidoCard from '@/components/LidoCard';
+import RocketPoolCard from '@/components/RocketPoolCard';
 import EmailCapture from '@/components/EmailCapture';
 import protocolsData from '@/data/protocols.json';
 
@@ -78,14 +79,17 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid gap-6">
           {filteredProtocols.map((protocol) => {
-            // Lidoだけリアルタイムデータを使用
+            // LidoとRocket Poolはリアルタイムデータを使用
             const isLido = protocol.name === 'Lido';
+            const isRocketPool = protocol.name === 'Rocket Pool';
 
-            return isLido ? (
-              <LidoCard key={protocol.id} />
-            ) : (
-              <ProtocolCard key={protocol.id} protocol={protocol} />
-            );
+            if (isLido) {
+              return <LidoCard key={protocol.id} />;
+            } else if (isRocketPool) {
+              return <RocketPoolCard key={protocol.id} />;
+            } else {
+              return <ProtocolCard key={protocol.id} protocol={protocol} />;
+            }
           })}
         </div>
 
