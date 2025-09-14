@@ -149,7 +149,7 @@ export default function LidoCard() {
 
             <div className="flex gap-2 mb-3">
               <span className="px-2 py-1 bg-gray-800 rounded-lg text-xs text-gray-300">
-                {data?.chains?.length > 1 ? 'Multi-chain' : staticData.chain}
+                {data?.chains && data.chains.length > 1 ? 'Multi-chain' : staticData.chain}
               </span>
               <span className="px-2 py-1 bg-gray-800 rounded-lg text-xs text-gray-300">
                 {staticData.category}
