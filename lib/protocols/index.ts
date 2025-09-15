@@ -20,40 +20,43 @@ export async function getProtocolData(id: string): Promise<ProtocolData> {
   let dynamicData: ProtocolData = {};
 
   try {
-    // 本番環境では相対パスを使用（同じドメイン）
-    // 開発環境では環境変数または動的ポート
-    const isProduction = process.env.NODE_ENV === 'production';
+    // Vercelでは絶対URLが必要な場合があるため、本番環境では完全なURLを構築
     let apiUrl = '';
 
     if (typeof window === 'undefined') {
       // サーバーサイド
-      if (isProduction) {
-        // 本番環境では相対パス（Vercel上では同じドメイン）
-        apiUrl = '';
+      if (process.env.VERCEL_URL) {
+        // Vercel環境
+        apiUrl = `https://${process.env.VERCEL_URL}`;
+      } else if (process.env.NEXT_PUBLIC_API_URL) {
+        // 環境変数が設定されている場合
+        apiUrl = process.env.NEXT_PUBLIC_API_URL;
       } else {
-        // 開発環境
-        apiUrl = process.env.NEXT_PUBLIC_API_URL || `http://localhost:${process.env.PORT || 3000}`;
+        // ローカル開発環境
+        apiUrl = `http://localhost:${process.env.PORT || 3000}`;
       }
-    } else {
-      // クライアントサイド - 常に相対パス
-      apiUrl = '';
     }
+    // クライアントサイドでは相対パス
 
     const fullUrl = `${apiUrl}/api/protocols/${id}`;
-    console.log(`Fetching protocol data from: ${fullUrl}`);
+    console.log(`[getProtocolData] Fetching from: ${fullUrl}`);
+    console.log(`[getProtocolData] Environment: NODE_ENV=${process.env.NODE_ENV}, VERCEL_URL=${process.env.VERCEL_URL}`);
 
     const res = await fetch(fullUrl, {
-      cache: 'no-store'
+      cache: 'no-store',
+      next: { revalidate: 0 }
     });
 
     if (res.ok) {
       dynamicData = await res.json();
-      console.log(`Successfully fetched data for ${id}:`, dynamicData);
+      console.log(`[getProtocolData] Success for ${id}:`, dynamicData);
     } else {
-      console.error(`API request failed with status ${res.status} for ${id}`);
+      console.error(`[getProtocolData] API failed with status ${res.status} for ${id}`);
+      const text = await res.text();
+      console.error(`[getProtocolData] Response body:`, text);
     }
   } catch (e) {
-    console.error(`Failed to fetch dynamic data for ${id}:`, e);
+    console.error(`[getProtocolData] Failed to fetch dynamic data for ${id}:`, e);
   }
 
   const staticData = protocolStaticData[id] || {};
