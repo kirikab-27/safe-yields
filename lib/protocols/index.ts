@@ -20,7 +20,11 @@ export async function getProtocolData(id: string): Promise<ProtocolData> {
   let dynamicData: ProtocolData = {};
 
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    // サーバーサイドでは相対パスを使用、クライアントサイドでは環境変数を使用
+    const baseUrl = typeof window === 'undefined'
+      ? `http://localhost:${process.env.PORT || 3000}`
+      : '';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || baseUrl;
     const res = await fetch(`${apiUrl}/api/protocols/${id}`, {
       cache: 'no-store'
     });

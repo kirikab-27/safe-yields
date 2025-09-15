@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
 export default function LidoCard() {
@@ -44,7 +45,8 @@ export default function LidoCard() {
   // ローディング中は静的データを表示（アニメーション付き）
   if (isLoading) {
     return (
-      <div className="bg-[#0F1419] border border-gray-800 rounded-2xl p-6 hover:border-green-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-400/5 opacity-70 animate-pulse">
+      <Link href="/protocols/lido" className="block">
+        <div className="bg-[#0F1419] border border-gray-800 rounded-2xl p-6 hover:border-green-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-400/5 opacity-70 animate-pulse cursor-pointer">
         <div className="flex justify-between items-start">
           {/* 左側 */}
           <div className="flex gap-4">
@@ -109,6 +111,7 @@ export default function LidoCard() {
           </div>
         </div>
       </div>
+      </Link>
     );
   }
 
@@ -118,7 +121,8 @@ export default function LidoCard() {
   const apy = data ? data.apy.toFixed(1) : staticData.apy;
 
   return (
-    <div className="bg-[#0F1419] border border-gray-800 rounded-2xl p-6 hover:border-green-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-400/5">
+    <Link href="/protocols/lido" className="block">
+      <div className="bg-[#0F1419] border border-gray-800 rounded-2xl p-6 hover:border-green-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-400/5 cursor-pointer">
       <div className="flex justify-between items-start">
         {/* 左側 */}
         <div className="flex gap-4">
@@ -228,5 +232,6 @@ export default function LidoCard() {
         )}
       </div>
     </div>
+    </Link>
   );
 }
