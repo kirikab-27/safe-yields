@@ -8,28 +8,88 @@ export async function generateStaticParams() {
   return [{ id: 'lido' }];
 }
 
+// DeFiLlamaのプロトコルIDマッピング
+const protocolMapping: Record<string, string> = {
+  'lido': 'lido',
+  'rocket-pool': 'rocket-pool',
+  'aave-v3': 'aave',
+  'compound-v3': 'compound-finance',
+  'curve': 'curve-dex'
+};
+
+// 固定APY値（フォールバック用）
+const fallbackAPY: Record<string, number> = {
+  'lido': 3.8,
+  'rocket-pool': 4.1,
+  'aave-v3': 2.5,
+  'compound-v3': 2.8,
+  'curve': 5.2
+};
+
 async function fetchProtocolData(id: string) {
   try {
-    // シンプルに相対パスを使用（Next.jsが自動的に正しいホストを使用）
-    const fullUrl = `/api/protocols/${id}`;
-    console.log(`[Page] Fetching from URL: ${fullUrl}`);
+    const defiLlamaId = protocolMapping[id];
+    if (!defiLlamaId) {
+      console.error(`[Page] Protocol not found: ${id}`);
+      return null;
+    }
 
-    const res = await fetch(fullUrl, {
+    // DeFiLlama APIを直接呼び出し
+    const protoUrl = `https://api.llama.fi/protocol/${defiLlamaId}`;
+    console.log(`[Page] Fetching from DeFiLlama: ${protoUrl}`);
+
+    const res = await fetch(protoUrl, {
       cache: 'no-store',
       next: { revalidate: 0 }
     });
 
     if (res.ok) {
-      const data = await res.json();
-      console.log(`[Page] API data received for ${id}:`, data);
+      const protoJson = await res.json();
+
+      // データ抽出
+      const apy = fallbackAPY[id] || 0;
+
+      // TVL計算
+      let tvl = 0;
+      if (protoJson.currentChainTvls) {
+        tvl = Object.values(protoJson.currentChainTvls).reduce((sum: number, val: any) => sum + (val || 0), 0);
+      } else if (typeof protoJson.tvl === 'number') {
+        tvl = protoJson.tvl;
+      } else if (Array.isArray(protoJson.tvl) && protoJson.tvl.length > 0) {
+        const lastEntry = protoJson.tvl[protoJson.tvl.length - 1];
+        tvl = lastEntry.totalLiquidityUSD || 0;
+      }
+
+      // チェーン情報
+      const chains = protoJson.chains || ['Ethereum'];
+
+      const data = {
+        id,
+        name: protoJson.name || id,
+        apy,
+        tvl,
+        chains,
+        audits: protoJson.audits || null,
+        lastUpdated: Date.now()
+      };
+
+      console.log(`[Page] Data processed for ${id}:`, data);
       return data;
     } else {
-      console.error(`[Page] API request failed with status ${res.status}`);
+      console.error(`[Page] DeFiLlama API failed with status ${res.status}`);
       return null;
     }
   } catch (error) {
     console.error(`[Page] Failed to fetch data for ${id}:`, error);
-    return null;
+    // エラー時はフォールバック値を返す
+    return {
+      id,
+      name: id,
+      apy: fallbackAPY[id] || 0,
+      tvl: 0,
+      chains: ['Ethereum'],
+      error: true
+    };
   }
 }
 
