@@ -1,11 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 25 --repo kirikab-27/safe-yields)",
-      "Bash(npm install:*)",
-      "Bash(npm run build:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(PORT=3010 npm run dev)"
     ],
     "deny": [],
     "ask": []
