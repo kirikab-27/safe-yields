@@ -43,7 +43,7 @@ export async function GET(
 ) {
   const { id } = params;
 
-  console.log(`[Dynamic API Route] Requested protocol: ${id}`);
+  console.log(`[Dynamic API Route] Requested protocol: ${id} at ${new Date().toISOString()}`);
 
   // プロトコルのマッピングを確認
   const defiLlamaId = protocolMapping[id];
