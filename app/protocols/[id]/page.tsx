@@ -3,9 +3,9 @@ import { Metadata } from 'next';
 import Script from 'next/script';
 import ProtocolCTA from '@/components/ProtocolCTA';
 
-// 動的レンダリングを強制（リアルタイムでAPIを呼び出す）
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// ISR (Incremental Static Regeneration) を使用
+// データは60秒ごとに再検証される
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   return [
