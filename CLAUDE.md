@@ -165,6 +165,55 @@ interface Protocol {
 }
 ```
 
+## 🔧 技術的な重要事項
+
+### Next.js App Routerでの外部API呼び出し
+
+**問題**: Server Componentsから内部APIルート（`/api/*`）を相対パスで呼び出すと、本番環境で失敗する。
+
+**解決策**:
+1. **推奨**: Server Componentsから外部API（DeFiLlama等）を直接呼び出す
+2. **代替**: 内部APIを使う場合は絶対URLを構築する必要がある
+
+**実装例**:
+```typescript
+// ✅ 推奨: 外部APIを直接呼び出し
+async function fetchProtocolData(id: string) {
+  const res = await fetch(`https://api.llama.fi/protocol/${id}`, {
+    cache: 'no-store',
+    next: { revalidate: 0 }
+  });
+  return res.json();
+}
+
+// ❌ 避ける: 相対パスでの内部API呼び出し
+const res = await fetch('/api/protocols/lido');  // 本番で失敗
+
+// ⚠️ 必要な場合: 絶対URLを構築
+const baseUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : 'http://localhost:3000';
+const res = await fetch(`${baseUrl}/api/protocols/lido`);
+```
+
+### TypeScript型定義の一貫性
+
+静的データと動的データをマージする場合、両方の型定義を一致させる必要がある:
+
+```typescript
+// 静的データの型定義
+type StaticProtocolData = {
+  name: string;
+  description: string;
+  website: string;
+  docs: string;
+  audit: string;
+  safetyScore: number;
+  apy?: number;    // オプショナル（APIから取得）
+  tvl?: number;     // オプショナル（APIから取得）
+}
+```
+
 ## 🚨 重要な注意事項
 
 ### 法的/コンプライアンス
