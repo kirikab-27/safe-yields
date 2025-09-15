@@ -1,4 +1,4 @@
-import { getProtocolData } from '@/lib/protocols';
+import { protocolStaticData } from '@/lib/protocols/static-data';
 
 // 動的レンダリングを強制（リアルタイムでAPIを呼び出す）
 export const dynamic = 'force-dynamic';
@@ -8,12 +8,48 @@ export async function generateStaticParams() {
   return [{ id: 'lido' }];
 }
 
+async function fetchProtocolData(id: string) {
+  try {
+    // シンプルに相対パスを使用（Next.jsが自動的に正しいホストを使用）
+    const fullUrl = `/api/protocols/${id}`;
+    console.log(`[Page] Fetching from URL: ${fullUrl}`);
+
+    const res = await fetch(fullUrl, {
+      cache: 'no-store',
+      next: { revalidate: 0 }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log(`[Page] API data received for ${id}:`, data);
+      return data;
+    } else {
+      console.error(`[Page] API request failed with status ${res.status}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`[Page] Failed to fetch data for ${id}:`, error);
+    return null;
+  }
+}
+
 export default async function ProtocolDetailPage({
   params
 }: {
   params: { id: string }
 }) {
-  const protocol = await getProtocolData(params.id);
+  // 静的データを取得
+  const staticData = protocolStaticData[params.id] || {};
+
+  // 動的データを取得
+  const dynamicData = await fetchProtocolData(params.id);
+
+  // データをマージ
+  const protocol = {
+    ...staticData,
+    ...dynamicData,
+    id: params.id
+  };
 
   // TVL整形
   const formatTVL = (tvl: number | undefined) => {

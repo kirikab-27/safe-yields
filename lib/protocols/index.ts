@@ -20,27 +20,9 @@ export async function getProtocolData(id: string): Promise<ProtocolData> {
   let dynamicData: ProtocolData = {};
 
   try {
-    // Vercelでは絶対URLが必要な場合があるため、本番環境では完全なURLを構築
-    let apiUrl = '';
-
-    if (typeof window === 'undefined') {
-      // サーバーサイド
-      if (process.env.VERCEL_URL) {
-        // Vercel環境
-        apiUrl = `https://${process.env.VERCEL_URL}`;
-      } else if (process.env.NEXT_PUBLIC_API_URL) {
-        // 環境変数が設定されている場合
-        apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      } else {
-        // ローカル開発環境
-        apiUrl = `http://localhost:${process.env.PORT || 3000}`;
-      }
-    }
-    // クライアントサイドでは相対パス
-
-    const fullUrl = `${apiUrl}/api/protocols/${id}`;
+    // シンプルに相対パスを使用
+    const fullUrl = `/api/protocols/${id}`;
     console.log(`[getProtocolData] Fetching from: ${fullUrl}`);
-    console.log(`[getProtocolData] Environment: NODE_ENV=${process.env.NODE_ENV}, VERCEL_URL=${process.env.VERCEL_URL}`);
 
     const res = await fetch(fullUrl, {
       cache: 'no-store',
