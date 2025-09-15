@@ -1,4 +1,7 @@
 import { protocolStaticData } from '@/lib/protocols/static-data';
+import { Metadata } from 'next';
+import Script from 'next/script';
+import ProtocolCTA from '@/components/ProtocolCTA';
 
 // 動的レンダリングを強制（リアルタイムでAPIを呼び出す）
 export const dynamic = 'force-dynamic';
@@ -6,6 +9,70 @@ export const revalidate = 0;
 
 export async function generateStaticParams() {
   return [{ id: 'lido' }];
+}
+
+// SEOメタデータ生成
+export async function generateMetadata(
+  { params }: { params: { id: string } }
+): Promise<Metadata> {
+  const staticData = protocolStaticData[params.id] || {};
+  const dynamicData = await fetchProtocolData(params.id);
+  const protocol = { ...staticData, ...dynamicData };
+
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'Safe Yields';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://safe-yields.com';
+  const defaultOgImage = process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE || '/og/default.png';
+
+  // TVLをフォーマット
+  const tvlFormatted = protocol.tvl
+    ? protocol.tvl >= 1_000_000_000
+      ? `$${(protocol.tvl / 1_000_000_000).toFixed(1)}B`
+      : `$${(protocol.tvl / 1_000_000).toFixed(1)}M`
+    : 'N/A';
+
+  return {
+    title: `${protocol.name || params.id} - APY ${protocol.apy || 'N/A'}% | ${siteName}`,
+    description: `${protocol.name}の安全性スコア、APY、TVL、監査情報を確認。DeFi投資のリスクを可視化。現在のAPY: ${protocol.apy || 'N/A'}%、TVL: ${tvlFormatted}、安全性スコア: ${protocol.safetyScore || 'N/A'}/100`,
+    keywords: `${protocol.name}, DeFi, yield farming, APY, TVL, safety score, staking, ${params.id}`,
+
+    openGraph: {
+      title: `${protocol.name} Safety Analysis - ${protocol.apy || 'N/A'}% APY`,
+      description: `安全性スコア: ${protocol.safetyScore || 'N/A'}/100。${protocol.description?.substring(0, 100) || 'DeFi投資の透明性を提供'}`,
+      type: 'website',
+      url: `${siteUrl}/protocols/${params.id}`,
+      siteName: siteName,
+      images: [{
+        url: `${siteUrl}${defaultOgImage}`,
+        width: 1200,
+        height: 630,
+        alt: `${protocol.name} on ${siteName}`
+      }],
+      locale: 'en_US',
+    },
+
+    twitter: {
+      card: 'summary_large_image',
+      title: `${protocol.name} - ${protocol.apy || 'N/A'}% APY`,
+      description: `Safety Score: ${protocol.safetyScore || 'N/A'}/100 | TVL: ${tvlFormatted}`,
+      images: [`${siteUrl}${defaultOgImage}`],
+    },
+
+    alternates: {
+      canonical: `${siteUrl}/protocols/${params.id}`,
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+  };
 }
 
 // DeFiLlamaのプロトコルIDマッピング
@@ -123,8 +190,35 @@ export default async function ProtocolDetailPage({
     return `$${tvl.toLocaleString()}`;
   };
 
+  // 構造化データ（JSON-LD）
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FinancialProduct',
+    name: `${protocol.name} Staking`,
+    description: protocol.description || `${protocol.name} DeFi protocol`,
+    provider: {
+      '@type': 'Organization',
+      name: protocol.name,
+      url: protocol.website
+    },
+    annualPercentageRate: protocol.apy,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://safe-yields.com'}/protocols/${params.id}`,
+    aggregateRating: protocol.safetyScore ? {
+      '@type': 'AggregateRating',
+      ratingValue: protocol.safetyScore,
+      bestRating: 100,
+      worstRating: 0
+    } : undefined
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* 構造化データ */}
+      <Script
+        id="json-ld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* パンくずリスト */}
       <nav className="p-6 text-gray-400">
         <a href="/" className="hover:text-white">Home</a>
@@ -168,8 +262,14 @@ export default async function ProtocolDetailPage({
           </p>
         </section>
 
+        {/* CTAセクション */}
+        <ProtocolCTA
+          protocolId={params.id}
+          protocolName={protocol.name || params.id}
+        />
+
         {/* リンク集 */}
-        <section>
+        <section className="mt-8">
           <h3 className="text-xl font-bold mb-4">Resources</h3>
           <div className="space-y-2">
             {protocol.website && (

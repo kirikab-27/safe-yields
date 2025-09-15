@@ -3,7 +3,11 @@
     "allow": [
       "Bash(npm run dev:*)",
       "Bash(curl:*)",
-      "Bash(PORT=3010 npm run dev)"
+      "Bash(PORT=3010 npm run dev)",
+      "Bash(gh issue view:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 27 --repo kirikab-27/safe-yields)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
