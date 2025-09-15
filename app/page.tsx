@@ -9,6 +9,7 @@ import LidoCard from '@/components/LidoCard';
 import RocketPoolCard from '@/components/RocketPoolCard';
 import AaveCard from '@/components/AaveCard';
 import CompoundCard from '@/components/CompoundCard';
+import CurveCard from '@/components/CurveCard';
 import EmailCapture from '@/components/EmailCapture';
 import protocolsData from '@/data/protocols.json';
 
@@ -81,11 +82,12 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid gap-6">
           {filteredProtocols.map((protocol) => {
-            // Lido、Rocket Pool、Aave V3、Compound V3はリアルタイムデータを使用
+            // Lido、Rocket Pool、Aave V3、Compound V3、Curve Financeはリアルタイムデータを使用
             const isLido = protocol.name === 'Lido';
             const isRocketPool = protocol.name === 'Rocket Pool';
             const isAave = protocol.name === 'Aave V3';
             const isCompound = protocol.name === 'Compound V3';
+            const isCurve = protocol.name === 'Curve Finance';
 
             if (isLido) {
               return <LidoCard key={protocol.id} />;
@@ -95,6 +97,8 @@ export default function Home() {
               return <AaveCard key={protocol.id} />;
             } else if (isCompound) {
               return <CompoundCard key={protocol.id} />;
+            } else if (isCurve) {
+              return <CurveCard key={protocol.id} />;
             } else {
               return <ProtocolCard key={protocol.id} protocol={protocol} />;
             }
