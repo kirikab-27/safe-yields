@@ -8,7 +8,10 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function generateStaticParams() {
-  return [{ id: 'lido' }];
+  return [
+    { id: 'lido' },
+    { id: 'rocket-pool' }
+  ];
 }
 
 // SEOメタデータ生成
@@ -261,6 +264,38 @@ export default async function ProtocolDetailPage({
             {protocol.description || 'No description available.'}
           </p>
         </section>
+
+        {/* Key Features */}
+        {protocol.features && protocol.features.length > 0 && (
+          <section className="mb-8">
+            <h3 className="text-xl font-bold mb-4">Key Features</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {protocol.features.map((feature: string, index: number) => (
+                <div key={index} className="flex items-start">
+                  <span className="text-green-400 mr-2 mt-1">✓</span>
+                  <span className="text-gray-300">{feature}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Risks to Consider */}
+        {protocol.risks && protocol.risks.length > 0 && (
+          <section className="mb-8">
+            <h3 className="text-xl font-bold mb-4">Risks to Consider</h3>
+            <div className="bg-yellow-900/10 border border-yellow-600/20 rounded-lg p-4">
+              <div className="space-y-2">
+                {protocol.risks.map((risk: string, index: number) => (
+                  <div key={index} className="flex items-start">
+                    <span className="text-yellow-400 mr-2 mt-1">⚠</span>
+                    <span className="text-gray-300">{risk}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* CTAセクション */}
         <ProtocolCTA

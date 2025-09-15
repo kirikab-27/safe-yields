@@ -7,6 +7,8 @@ export const protocolStaticData: Record<string, {
   safetyScore: number;
   apy?: number;
   tvl?: number;
+  features?: string[];
+  risks?: string[];
 }> = {
   'lido': {
     name: 'Lido',
@@ -16,7 +18,43 @@ export const protocolStaticData: Record<string, {
     audit: 'https://github.com/lidofinance/audits',
     safetyScore: 95,
     apy: undefined,  // Will be fetched from API
-    tvl: undefined   // Will be fetched from API
+    tvl: undefined,   // Will be fetched from API
+    features: [
+      'Liquid staking with stETH tokens',
+      'No minimum ETH requirement',
+      'Daily staking rewards',
+      'DeFi composability across protocols',
+      'Professional node operators'
+    ],
+    risks: [
+      'Smart contract risk',
+      'stETH/ETH peg deviation risk',
+      'Centralization concerns',
+      'Slashing risk from validators'
+    ]
+  },
+  'rocket-pool': {
+    name: 'Rocket Pool',
+    description: 'Rocket Pool is a decentralized Ethereum staking protocol. It allows users to run a validator with only 16 ETH, and provides liquid staking through rETH tokens for those with less ETH.',
+    website: 'https://rocketpool.net',
+    docs: 'https://docs.rocketpool.net',
+    audit: 'https://rocketpool.net/files/audit-reports',
+    safetyScore: 90,
+    apy: undefined,  // Will be fetched from API
+    tvl: undefined,   // Will be fetched from API
+    features: [
+      'Minimum 16 ETH for node operators',
+      'rETH liquid staking token',
+      'Decentralized validator network',
+      'Built-in slashing insurance',
+      'Permissionless node operation'
+    ],
+    risks: [
+      'Smart contract risk',
+      'Validator performance risk',
+      'rETH/ETH price deviation risk',
+      'Node operator collateral risk'
+    ]
   }
-  // 今後追加: rocket-pool, aave-v3, compound-v3, curve
+  // 今後追加: aave-v3, compound-v3, curve
 };

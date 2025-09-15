@@ -1,7 +1,8 @@
 export default function ProtocolsPage() {
   const protocols = [
     { id: 'lido', name: 'Lido' },
-    // 今後追加: rocket-pool, aave-v3, compound-v3, curve
+    { id: 'rocket-pool', name: 'Rocket Pool' },
+    // 今後追加: aave-v3, compound-v3, curve
   ];
 
   return (
