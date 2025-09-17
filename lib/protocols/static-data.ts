@@ -78,5 +78,28 @@ export const protocolStaticData: Record<string, {
       'Interest rate volatility',
       'Oracle manipulation risk'
     ]
+  },
+  'compound-v3': {
+    name: 'Compound V3',
+    description: 'Compound V3 is a streamlined version of the Compound protocol, focusing on security and capital efficiency. It features a single borrowable asset per market and improved risk management.',
+    website: 'https://app.compound.finance',
+    docs: 'https://docs.compound.finance',
+    audit: 'https://github.com/compound-finance/comet/tree/main/audits',
+    safetyScore: 94,
+    apy: undefined,  // Will be fetched from API
+    tvl: undefined,   // Will be fetched from API
+    features: [
+      'Single borrowable asset design',
+      'Improved capital efficiency',
+      'Better liquidation mechanism',
+      'Supply caps for risk management',
+      'Account management features'
+    ],
+    risks: [
+      'Smart contract risk',
+      'Liquidation risk',
+      'Market manipulation risk',
+      'Governance risk'
+    ]
   }
 };

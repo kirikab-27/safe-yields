@@ -5,7 +5,8 @@ export default function ProtocolsPage() {
     { id: 'lido', name: 'Lido' },
     { id: 'rocket-pool', name: 'Rocket Pool' },
     { id: 'aave-v3', name: 'Aave V3' },
-    // 今後追加: compound-v3, curve
+    { id: 'compound-v3', name: 'Compound V3' },
+    // 今後追加: curve
   ];
 
   return (
