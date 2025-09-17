@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
 export default function CompoundCard() {
@@ -122,8 +123,9 @@ export default function CompoundCard() {
   const apy = data ? data.apy.toFixed(1) : staticData.apy;
 
   return (
-    <div className="bg-[#0F1419] border border-gray-800 rounded-2xl p-6 hover:border-green-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-400/5">
-      <div className="flex justify-between items-start">
+    <Link href="/protocols/compound-v3" className="block">
+      <div className="bg-[#0F1419] border border-gray-800 rounded-2xl p-6 hover:border-green-400/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-400/5 cursor-pointer">
+        <div className="flex justify-between items-start">
         {/* 左側 */}
         <div className="flex gap-4">
           {/* アイコン */}
@@ -237,6 +239,7 @@ export default function CompoundCard() {
           V3 Markets
         </span>
       </div>
-    </div>
+      </div>
+    </Link>
   );
 }

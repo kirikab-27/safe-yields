@@ -55,6 +55,28 @@ export const protocolStaticData: Record<string, {
       'rETH/ETH price deviation risk',
       'Node operator collateral risk'
     ]
+  },
+  'aave-v3': {
+    name: 'Aave V3',
+    description: 'Aave V3 is a decentralized lending protocol that allows users to lend, borrow, and earn interest on crypto assets. Features include isolated markets, efficiency mode, and cross-chain portals.',
+    website: 'https://app.aave.com',
+    docs: 'https://docs.aave.com',
+    audit: 'https://github.com/aave/aave-v3-core/tree/main/audits',
+    safetyScore: 98,
+    apy: undefined,  // Will be fetched from API
+    tvl: undefined,   // Will be fetched from API
+    features: [
+      'Multi-chain deployment',
+      'Isolation mode for new assets',
+      'Efficiency mode for correlated assets',
+      'Portal for cross-chain lending',
+      'Advanced risk parameters'
+    ],
+    risks: [
+      'Smart contract risk',
+      'Liquidation risk',
+      'Interest rate volatility',
+      'Oracle manipulation risk'
+    ]
   }
-  // 今後追加: aave-v3, compound-v3, curve
 };
