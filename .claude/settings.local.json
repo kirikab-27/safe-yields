@@ -13,7 +13,8 @@
       "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 28 --repo kirikab-27/safe-yields)",
       "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 37 --repo kirikab-27/safe-yields)",
       "Bash(\"/c/Program Files/GitHub CLI/gh\" issue list --repo kirikab-27/safe-yields --state open --limit 10)",
-      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 34 --repo kirikab-27/safe-yields)"
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 34 --repo kirikab-27/safe-yields)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 29 --repo kirikab-27/safe-yields)"
     ],
     "deny": [],
     "ask": []

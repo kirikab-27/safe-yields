@@ -10,7 +10,8 @@ export const revalidate = 60;
 export async function generateStaticParams() {
   return [
     { id: 'lido' },
-    { id: 'rocket-pool' }
+    { id: 'rocket-pool' },
+    { id: 'aave-v3' }
   ];
 }
 
