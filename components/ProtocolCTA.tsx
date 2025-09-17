@@ -1,6 +1,8 @@
 'use client';
 
-import { track } from '@vercel/analytics';
+import { getProtocol, mapProtocolId } from '@/lib/config/protocols';
+import { affiliateLinks, getBestExchangeForProtocol, getExchangeLinks, hasAffiliateCode } from '@/lib/config/affiliates';
+import { tracking } from '@/lib/config/tracking';
 
 interface ProtocolCTAProps {
   protocolId: string;
@@ -8,43 +10,38 @@ interface ProtocolCTAProps {
 }
 
 export default function ProtocolCTA({ protocolId, protocolName }: ProtocolCTAProps) {
-  // アフィリエイトリンクの取得
-  const getAffiliateLink = () => {
-    // プロトコル固有のアフィリエイトリンク
-    const protocolAffiliates: Record<string, string | undefined> = {
-      'lido': process.env.NEXT_PUBLIC_LIDO_AFFILIATE,
-      'rocket-pool': process.env.NEXT_PUBLIC_ROCKETPOOL_AFFILIATE,
-      'aave-v3': process.env.NEXT_PUBLIC_AAVE_AFFILIATE,
-      'compound-v3': process.env.NEXT_PUBLIC_COMPOUND_AFFILIATE,
-      'curve': process.env.NEXT_PUBLIC_CURVE_AFFILIATE,
-    };
+  // Map old format IDs to new format
+  const mappedId = mapProtocolId(protocolId);
+  const protocol = getProtocol(protocolId);
 
-    // プロトコル固有のリンクがあればそれを使用、なければBinanceへ誘導
-    return protocolAffiliates[protocolId] ||
-           process.env.NEXT_PUBLIC_BINANCE_AFFILIATE ||
-           'https://www.binance.com';
+  // Get affiliate link from config or fallback to best exchange
+  const getAffiliateLink = () => {
+    if (protocol?.affiliate) {
+      return protocol.affiliate;
+    }
+    return getBestExchangeForProtocol(mappedId);
   };
 
-  // クリックトラッキング
+  // Click tracking using centralized tracking
   const handleCtaClick = () => {
-    // Vercel Analyticsにイベント送信
-    track(`${protocolId}_cta_click`, {
+    tracking.trackCtaClick(protocolId, {
       protocol: protocolName,
-      type: 'primary_cta'
     });
   };
 
   const handleSecondaryCtaClick = (exchange: string) => {
-    track(`${exchange}_from_${protocolId}`, {
+    tracking.trackAffiliateClick(exchange, protocolId, {
       protocol: protocolName,
-      exchange: exchange,
-      type: 'secondary_cta'
     });
   };
 
   const affiliateLink = getAffiliateLink();
-  const isProtocolDirect = affiliateLink.includes(protocolId) ||
+  const isProtocolDirect = hasAffiliateCode(affiliateLink) ||
+                          affiliateLink.includes(protocolId) ||
                           affiliateLink.includes(protocolName.toLowerCase());
+
+  // Get exchange links for secondary CTAs
+  const exchanges = getExchangeLinks();
 
   return (
     <section className="mt-8 space-y-4">
@@ -71,47 +68,55 @@ export default function ProtocolCTA({ protocolId, protocolName }: ProtocolCTAPro
         </a>
       </div>
 
-      {/* セカンダリCTA（CEX誘導） */}
-      {!isProtocolDirect && (
-        <div className="bg-gray-900 p-4 rounded-lg">
-          <p className="text-sm text-gray-400 mb-3">
-            New to DeFi? Start with a trusted exchange:
+      {/* セカンダリCTA（CEX誘導） - Show top exchanges */}
+      <div className="bg-gray-900 p-4 rounded-lg">
+        <p className="text-sm text-gray-400 mb-3">
+          {isProtocolDirect
+            ? 'Alternative ways to get started:'
+            : 'New to DeFi? Start with a trusted exchange:'}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          {Object.entries(exchanges).slice(0, 3).map(([key, exchange]) => (
+            <a
+              key={key}
+              href={exchange.url}
+              onClick={() => handleSecondaryCtaClick(key)}
+              rel="sponsored noopener"
+              target="_blank"
+              className="text-green-400 hover:text-green-300 underline text-sm"
+            >
+              {exchange.name} ({exchange.benefit}) →
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Hardware wallet recommendation for large amounts */}
+      {protocol && protocol.safetyScore >= 90 && (
+        <div className="bg-blue-900/20 border border-blue-600/30 p-3 rounded-lg">
+          <p className="text-xs text-blue-400">
+            💡 <strong>Security Tip:</strong> For large investments, consider using a hardware wallet like{' '}
+            <a
+              href={affiliateLinks.ledger}
+              onClick={() => handleSecondaryCtaClick('ledger')}
+              rel="sponsored noopener"
+              target="_blank"
+              className="underline hover:text-blue-300"
+            >
+              Ledger
+            </a>{' '}
+            or{' '}
+            <a
+              href={affiliateLinks.trezor}
+              onClick={() => handleSecondaryCtaClick('trezor')}
+              rel="sponsored noopener"
+              target="_blank"
+              className="underline hover:text-blue-300"
+            >
+              Trezor
+            </a>{' '}
+            for enhanced security.
           </p>
-          <div className="flex flex-wrap gap-3">
-            {process.env.NEXT_PUBLIC_BINANCE_AFFILIATE && (
-              <a
-                href={process.env.NEXT_PUBLIC_BINANCE_AFFILIATE}
-                onClick={() => handleSecondaryCtaClick('binance')}
-                rel="sponsored noopener"
-                target="_blank"
-                className="text-green-400 hover:text-green-300 underline text-sm"
-              >
-                Binance (20% fee discount) →
-              </a>
-            )}
-            {process.env.NEXT_PUBLIC_BYBIT_AFFILIATE && (
-              <a
-                href={process.env.NEXT_PUBLIC_BYBIT_AFFILIATE}
-                onClick={() => handleSecondaryCtaClick('bybit')}
-                rel="sponsored noopener"
-                target="_blank"
-                className="text-green-400 hover:text-green-300 underline text-sm"
-              >
-                Bybit (Bonus rewards) →
-              </a>
-            )}
-            {process.env.NEXT_PUBLIC_COINBASE_AFFILIATE && (
-              <a
-                href={process.env.NEXT_PUBLIC_COINBASE_AFFILIATE}
-                onClick={() => handleSecondaryCtaClick('coinbase')}
-                rel="sponsored noopener"
-                target="_blank"
-                className="text-green-400 hover:text-green-300 underline text-sm"
-              >
-                Coinbase (User-friendly) →
-              </a>
-            )}
-          </div>
         </div>
       )}
 
