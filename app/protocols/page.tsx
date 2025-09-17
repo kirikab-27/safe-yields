@@ -6,7 +6,7 @@ export default function ProtocolsPage() {
     { id: 'rocket-pool', name: 'Rocket Pool' },
     { id: 'aave-v3', name: 'Aave V3' },
     { id: 'compound-v3', name: 'Compound V3' },
-    // 今後追加: curve
+    { id: 'curve', name: 'Curve Finance' }
   ];
 
   return (

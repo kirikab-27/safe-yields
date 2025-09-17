@@ -101,5 +101,28 @@ export const protocolStaticData: Record<string, {
       'Market manipulation risk',
       'Governance risk'
     ]
+  },
+  'curve': {
+    name: 'Curve Finance',
+    description: 'Curve Finance is a DEX optimized for stablecoin trading and low slippage swaps. It provides deep liquidity for stable assets and features innovative AMM mechanisms.',
+    website: 'https://curve.fi',
+    docs: 'https://docs.curve.fi',
+    audit: 'https://github.com/curvefi/curve-contract/tree/master/audits',
+    safetyScore: 88,
+    apy: undefined,  // Will be fetched from API
+    tvl: undefined,   // Will be fetched from API
+    features: [
+      'Optimized for stablecoin swaps',
+      'Low slippage trading',
+      'Liquidity provider rewards',
+      'Vote-locked CRV (veCRV) governance',
+      'Metapools for composability'
+    ],
+    risks: [
+      'Smart contract risk',
+      'Impermanent loss risk',
+      'Peg deviation risk',
+      'Governance attack risk'
+    ]
   }
 };

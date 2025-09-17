@@ -12,7 +12,8 @@ export async function generateStaticParams() {
     { id: 'lido' },
     { id: 'rocket-pool' },
     { id: 'aave-v3' },
-    { id: 'compound-v3' }
+    { id: 'compound-v3' },
+    { id: 'curve' }
   ];
 }
 
