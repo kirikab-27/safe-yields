@@ -1,4 +1,6 @@
 import { protocolStaticData } from '@/lib/protocols/static-data';
+import { protocolConfig } from '@/lib/config/protocols';
+import { getProtocolBySlug } from '@/lib/config/protocols';
 import { Metadata } from 'next';
 import Script from 'next/script';
 import ProtocolCTA from '@/components/ProtocolCTA';
@@ -21,9 +23,11 @@ export async function generateStaticParams() {
 export async function generateMetadata(
   { params }: { params: { id: string } }
 ): Promise<Metadata> {
+  // 共通設定から取得（slugベースで検索）
+  const configData = getProtocolBySlug(params.id);
   const staticData = protocolStaticData[params.id] || {};
   const dynamicData = await fetchProtocolData(params.id);
-  const protocol = { ...staticData, ...dynamicData };
+  const protocol = { ...configData, ...staticData, ...dynamicData };
 
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'Safe Yields';
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://safe-yields.com';
@@ -170,14 +174,18 @@ export default async function ProtocolDetailPage({
 }: {
   params: { id: string }
 }) {
-  // 静的データを取得
+  // 共通設定から取得（slugベースで検索）
+  const configData = getProtocolBySlug(params.id);
+
+  // 静的データを取得（後方互換性のため残す）
   const staticData = protocolStaticData[params.id] || {};
 
   // 動的データを取得
   const dynamicData = await fetchProtocolData(params.id);
 
-  // データをマージ
+  // データをマージ（configDataを優先）
   const protocol = {
+    ...configData,
     ...staticData,
     ...dynamicData,
     id: params.id
