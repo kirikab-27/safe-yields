@@ -6,8 +6,8 @@ import Script from 'next/script';
 import ProtocolCTA from '@/components/ProtocolCTA';
 
 // ISR (Incremental Static Regeneration) を使用
-// データは60秒ごとに再検証される
-export const revalidate = 60;
+// データは5分ごとに再検証される（タイムアウト対策）
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   return [
@@ -103,6 +103,24 @@ const fallbackAPY: Record<string, number> = {
   'curve': 5.2
 };
 
+// タイムアウト付きfetch関数
+async function fetchWithTimeout(url: string, timeout = 15000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      next: { revalidate: 300 } // revalidateを5分に延長
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
 async function fetchProtocolData(id: string) {
   try {
     const defiLlamaId = protocolMapping[id];
@@ -111,13 +129,11 @@ async function fetchProtocolData(id: string) {
       return null;
     }
 
-    // DeFiLlama APIを直接呼び出し
+    // DeFiLlama APIを直接呼び出し（タイムアウト付き）
     const protoUrl = `https://api.llama.fi/protocol/${defiLlamaId}`;
     console.log(`[Page] Fetching from DeFiLlama: ${protoUrl}`);
 
-    const res = await fetch(protoUrl, {
-      next: { revalidate: 60 }
-    });
+    const res = await fetchWithTimeout(protoUrl, 10000); // 10秒タイムアウト
 
     if (res.ok) {
       const protoJson = await res.json();
@@ -155,16 +171,18 @@ async function fetchProtocolData(id: string) {
       console.error(`[Page] DeFiLlama API failed with status ${res.status}`);
       return null;
     }
-  } catch (error) {
-    console.error(`[Page] Failed to fetch data for ${id}:`, error);
-    // エラー時はフォールバック値を返す
+  } catch (error: any) {
+    console.error(`[Page] Failed to fetch data for ${id}:`, error.message || error);
+    // エラー時は共通設定からフォールバック値を返す
+    const configData = getProtocolBySlug(id);
     return {
       id,
-      name: id,
-      apy: fallbackAPY[id] || 0,
-      tvl: 0,
-      chains: ['Ethereum'],
-      error: true
+      name: configData?.name || id,
+      apy: fallbackAPY[id] || configData?.fallbackData?.apy || 0,
+      tvl: configData?.fallbackData?.tvl || 0,
+      chains: configData?.chains || ['Ethereum'],
+      error: true,
+      errorMessage: error.name === 'AbortError' ? 'Request timeout' : error.message
     };
   }
 }
