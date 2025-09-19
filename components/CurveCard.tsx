@@ -3,6 +3,10 @@
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
+interface CurveCardProps {
+  liveApy?: number | null;
+}
+
 export default function CurveCard({ liveApy }: CurveCardProps) {
   const { data, error, isLoading, isFromCache } = useProtocolData('curve');
 

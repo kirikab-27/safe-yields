@@ -3,6 +3,10 @@
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
+interface RocketPoolCardProps {
+  liveApy?: number | null;
+}
+
 export default function RocketPoolCard({ liveApy }: RocketPoolCardProps) {
   const { data, error, isLoading, isFromCache } = useProtocolData('rocket-pool');
 

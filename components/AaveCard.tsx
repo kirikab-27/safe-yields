@@ -3,6 +3,10 @@
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
+interface AaveCardProps {
+  liveApy?: number | null;
+}
+
 export default function AaveCard({ liveApy }: AaveCardProps) {
   const { data, error, isLoading, isFromCache } = useProtocolData('aave-v3');
 
