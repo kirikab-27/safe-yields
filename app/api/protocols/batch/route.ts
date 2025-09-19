@@ -160,7 +160,9 @@ async function fetchProtocolData(protocolId: string): Promise<ProtocolData | nul
                 } else {
                   apy = validPools.reduce((s: number, p: any) => s + (p.apyBase || 0), 0) / validPools.length;
                 }
-                apy = Math.round(apy * 100) / 100;
+                if (apy !== null) {
+                  apy = Math.round(apy * 100) / 100;
+                }
               }
             }
           }

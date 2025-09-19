@@ -46,10 +46,24 @@ interface ProtocolData {
 ## 関連ファイル
 - `app/api/protocols/batch/route.ts` (修正済み)
 
+## 追加エラー (21:01)
+```
+Type error: 'apy' is possibly 'null'.
+  163 | apy = Math.round(apy * 100) / 100;
+```
+
+### 追加修正
+`apy`変数がnullの可能性があるため、計算前にnullチェックを追加:
+```typescript
+if (apy !== null) {
+  apy = Math.round(apy * 100) / 100;
+}
+```
+
 ## テスト結果
 - ローカルビルドテスト: ✅ 成功
-- TypeScriptコンパイル: ✅ エラー解消
-- Vercelデプロイ: 🔄 準備完了
+- TypeScriptコンパイル: ✅ エラー解消 (2回目)
+- Vercelデプロイ: 🔄 再実行中
 
 ## 今後の対応
 1. Vercelへの再デプロイ実行
