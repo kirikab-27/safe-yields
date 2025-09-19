@@ -89,10 +89,29 @@ Type error: Property 'apyRange' does not exist on type
  protocol.apyRange.min > 0 && (
 ```
 
+## 追加エラー4 (21:13)
+```
+Type error: 'data.apy' is possibly 'null'.
+  208 | {data.apy.toFixed(2)}%
+```
+
+### 追加修正4
+`test-api-batch/page.tsx`でもnullチェックを追加:
+```typescript
+{data.apy !== null ? `${data.apy.toFixed(2)}%` : '--'}
+```
+
 ## テスト結果
 - ローカルビルドテスト: ✅ 成功
-- TypeScriptコンパイル: ✅ エラー解消 (4回目)
+- TypeScriptコンパイル: ✅ エラー解消 (5回目)
 - Vercelデプロイ: 🔄 再実行中
+
+## 修正概要
+null許容型への変更により発生したすべてのTypeScriptエラーを修正完了。
+主要な変更点：
+1. 型定義を`number | null`に更新
+2. すべてのAPY表示箇所でnullチェック追加
+3. 推定値の削除（Compound V3）
 
 ## 今後の対応
 1. Vercelへの再デプロイ実行

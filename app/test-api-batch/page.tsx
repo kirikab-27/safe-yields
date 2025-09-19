@@ -205,7 +205,7 @@ export default function TestBatchAPIPage() {
                         <div>
                           <span className="text-gray-400">APY:</span>{' '}
                           <span className="text-green-400 font-semibold">
-                            {data.apy.toFixed(2)}%
+                            {data.apy !== null ? `${data.apy.toFixed(2)}%` : '--'}
                           </span>
                         </div>
                         <div>
