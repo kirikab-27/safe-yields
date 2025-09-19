@@ -7,7 +7,7 @@ interface ProtocolData {
   id: string;
   name: string;
   tvl: number;
-  apy: number;
+  apy: number | null;
   chains?: string[];
   audits?: string | number;
   lastUpdated: number;

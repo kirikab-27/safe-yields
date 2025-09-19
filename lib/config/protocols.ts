@@ -23,7 +23,7 @@ export interface ProtocolConfig {
   features?: string[];
   risks?: string[];
   fallbackData: {
-    apy: number;
+    apy: number | null;
     tvl: number;
   };
   defiLlamaId: string;  // ID for DeFiLlama API

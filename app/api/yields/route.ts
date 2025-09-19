@@ -23,7 +23,7 @@ export async function GET() {
     const apyMap = apyData.reduce((acc, item) => {
       acc[item.id] = item.apy;
       return acc;
-    }, {} as Record<string, number>);
+    }, {} as Record<string, number | null>);
 
     return NextResponse.json({
       success: true,

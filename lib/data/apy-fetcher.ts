@@ -6,7 +6,7 @@ export interface YieldPool {
   tvlUsd: number;
   apyBase: number | null;
   apyReward: number | null;
-  apy: number;
+  apy: number | null;
   pool: string;
   stablecoin: boolean;
 }
