@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
 interface CompoundCardProps {
-  liveApy?: number;
+  liveApy?: number | null;
 }
 
 export default function CompoundCard({ liveApy }: CompoundCardProps) {
@@ -129,9 +129,7 @@ export default function CompoundCard({ liveApy }: CompoundCardProps) {
     ? liveApy.toFixed(1)
     : data?.apy !== null && data?.apy !== undefined
       ? data.apy.toFixed(1)
-      : staticData.apy !== null
-        ? staticData.apy.toString()
-        : '--';
+      : '--';  // staticData.apy is null for Compound V3
 
   return (
     <Link href="/protocols/compound-v3" className="block">

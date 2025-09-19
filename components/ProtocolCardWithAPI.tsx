@@ -164,7 +164,7 @@ export default function ProtocolCardWithAPI({ protocolId, staticData }: Props) {
             </div>
             <div className="mt-3">
               <div className="text-2xl font-bold text-yellow-400">
-                {data.apy.toFixed(1)}%
+                {data.apy !== null && data.apy !== undefined ? `${data.apy.toFixed(1)}%` : '--'}
               </div>
               <div className="text-xs text-gray-500">APY</div>
             </div>

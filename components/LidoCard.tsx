@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
 interface LidoCardProps {
-  liveApy?: number;
+  liveApy?: number | null;
 }
 
 export default function LidoCard({ liveApy }: LidoCardProps) {
@@ -125,7 +125,11 @@ export default function LidoCard({ liveApy }: LidoCardProps) {
   const displayData = data || staticData;
   const tvl = data ? formatTVL(data.tvl) : staticData.tvl;
   // Use live APY if available, otherwise use API data or static fallback
-  const apy = liveApy !== undefined ? liveApy.toFixed(1) : data ? data.apy.toFixed(1) : staticData.apy;
+  const apy = liveApy !== undefined && liveApy !== null
+    ? liveApy.toFixed(1)
+    : data?.apy !== null && data?.apy !== undefined
+      ? data.apy.toFixed(1)
+      : staticData.apy;
 
   return (
     <Link href="/protocols/lido" className="block">

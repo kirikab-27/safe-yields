@@ -122,7 +122,11 @@ export default function RocketPoolCard({ liveApy }: RocketPoolCardProps) {
   // APIデータまたは静的データを使用
   const displayData = data || staticData;
   const tvl = data ? formatTVL(data.tvl) : staticData.tvl;
-  const apy = liveApy !== undefined ? liveApy.toFixed(1) : data ? data.apy.toFixed(1) : staticData.apy;
+  const apy = liveApy !== undefined && liveApy !== null
+    ? liveApy.toFixed(1)
+    : data?.apy !== null && data?.apy !== undefined
+      ? data.apy.toFixed(1)
+      : staticData.apy;
 
   return (
     <Link href="/protocols/rocket-pool" className="block">

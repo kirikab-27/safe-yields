@@ -147,7 +147,7 @@ export async function getProtocolAPY(protocolId: string): Promise<{
     // Special handling for Compound V3 - return null if no valid data
     if (protocolId === 'compound-v3') {
       // Check if any pools have meaningful data
-      const hasValidData = protocolPools.some(pool => pool.tvlUsd > 1000 && pool.apy > 0);
+      const hasValidData = protocolPools.some(pool => pool.tvlUsd > 1000 && pool.apy !== null && pool.apy > 0);
       if (!hasValidData) {
         console.log(`[APY] ${protocolId}: No valid pools found, returning null`);
         return {
@@ -165,7 +165,7 @@ export async function getProtocolAPY(protocolId: string): Promise<{
     const topPools = protocolPools.slice(0, 5);
 
     for (const pool of topPools) {
-      if (pool.apy > 0 && pool.tvlUsd > 0) {
+      if (pool.apy !== null && pool.apy > 0 && pool.tvlUsd > 0) {
         totalTvl += pool.tvlUsd;
         weightedApy += pool.apy * pool.tvlUsd;
       }
@@ -195,8 +195,12 @@ export async function getBestAPYPool(protocolId: string): Promise<YieldPool | nu
 
   // Find pool with highest APY and reasonable TVL (> $1M)
   const bestPool = pools
-    .filter(pool => pool.tvlUsd > 1_000_000)
-    .sort((a, b) => b.apy - a.apy)[0];
+    .filter(pool => pool.tvlUsd > 1_000_000 && pool.apy !== null)
+    .sort((a, b) => {
+      if (a.apy === null) return 1;
+      if (b.apy === null) return -1;
+      return b.apy - a.apy;
+    })[0];
 
   return bestPool || pools[0]; // Fallback to highest TVL pool
 }
@@ -214,8 +218,8 @@ export async function getProtocolAPYRange(protocolId: string): Promise<{
   }
 
   const apys = pools
-    .filter(pool => pool.apy > 0)
-    .map(pool => pool.apy);
+    .filter(pool => pool.apy !== null && pool.apy > 0)
+    .map(pool => pool.apy as number);  // Type assertion safe after filter
 
   if (apys.length === 0) {
     return { min: 0, max: 0, average: 0 };
