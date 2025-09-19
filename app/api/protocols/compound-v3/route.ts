@@ -66,7 +66,7 @@ export async function GET() {
     const protoJson = await protoRes.json().catch(() => ({}));
 
     // 3) APY取得の試み（3段階のフォールバック）
-    let apy = 2.8; // デフォルトフォールバック値（Compound V3の一般的なAPY）
+    let apy = null; // Compound V3はデータがない場合はnullを返す
 
     try {
       // Step 1: pools2 APIからAPY取得を試みる
@@ -158,7 +158,7 @@ export async function GET() {
       id: 'compound-v3',
       name: 'Compound V3',
       tvl: 2800000000, // 約2.8B（推定値、主にBase USDC市場）
-      apy: 2.8,
+      apy: null,  // 推定値を使わない
       chains: ['ethereum', 'base', 'polygon', 'arbitrum'],
       audits: '4',
       lastUpdated: Date.now(),

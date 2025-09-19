@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
-export default function AaveCard() {
+export default function AaveCard({ liveApy }: AaveCardProps) {
   const { data, error, isLoading, isFromCache } = useProtocolData('aave-v3');
 
   const getRiskColor = (risk: string) => {
@@ -116,7 +116,7 @@ export default function AaveCard() {
   // APIデータまたは静的データを使用
   const displayData = data || staticData;
   const tvl = data ? formatTVL(data.tvl) : staticData.tvl;
-  const apy = data ? data.apy.toFixed(1) : staticData.apy;
+  const apy = liveApy !== undefined ? liveApy.toFixed(1) : data ? data.apy.toFixed(1) : staticData.apy;
 
   return (
     <Link href="/protocols/aave-v3" className="block">

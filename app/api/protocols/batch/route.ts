@@ -95,7 +95,7 @@ async function fetchProtocolData(protocolId: string): Promise<ProtocolData | nul
         'compound-v3': {
           protocol: `${DEFILLAMA}/protocol/compound`,
           pools: `${DEFILLAMA}/pools2?project=compound-v3`,
-          fallbackApy: 2.8
+          fallbackApy: null  // No estimated values for Compound V3
         },
         'curve': {
           protocol: `${DEFILLAMA}/protocol/curve`,
@@ -232,7 +232,7 @@ async function fetchProtocolData(protocolId: string): Promise<ProtocolData | nul
         id: 'compound-v3',
         name: 'Compound V3',
         tvl: 2800000000,
-        apy: 2.8,
+        apy: null,  // No estimated values for Compound V3
         chains: ['ethereum', 'polygon', 'arbitrum', 'base'],
         audits: '4',
         lastUpdated: Date.now(),

@@ -1,6 +1,7 @@
 import { protocolStaticData } from '@/lib/protocols/static-data';
 import { protocolConfig } from '@/lib/config/protocols';
 import { getProtocolBySlug } from '@/lib/config/protocols';
+import { getProtocolAPY, getProtocolAPYRange } from '@/lib/data/apy-fetcher';
 import { Metadata } from 'next';
 import Script from 'next/script';
 import ProtocolCTA from '@/components/ProtocolCTA';
@@ -41,12 +42,12 @@ export async function generateMetadata(
     : 'N/A';
 
   return {
-    title: `${protocol.name || params.id} - APY ${protocol.apy || 'N/A'}% | ${siteName}`,
-    description: `${protocol.name}の安全性スコア、APY、TVL、監査情報を確認。DeFi投資のリスクを可視化。現在のAPY: ${protocol.apy || 'N/A'}%、TVL: ${tvlFormatted}、安全性スコア: ${protocol.safetyScore || 'N/A'}/100`,
+    title: `${protocol.name || params.id} - APY ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}%` : 'N/A'} | ${siteName}`,
+    description: `${protocol.name}の安全性スコア、APY、TVL、監査情報を確認。DeFi投資のリスクを可視化。現在のAPY: ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}%` : 'N/A'}、TVL: ${tvlFormatted}、安全性スコア: ${protocol.safetyScore || 'N/A'}/100`,
     keywords: `${protocol.name}, DeFi, yield farming, APY, TVL, safety score, staking, ${params.id}`,
 
     openGraph: {
-      title: `${protocol.name} Safety Analysis - ${protocol.apy || 'N/A'}% APY`,
+      title: `${protocol.name} Safety Analysis - ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}% APY` : 'APY N/A'}`,
       description: `安全性スコア: ${protocol.safetyScore || 'N/A'}/100。${protocol.description?.substring(0, 100) || 'DeFi投資の透明性を提供'}`,
       type: 'website',
       url: `${siteUrl}/protocols/${params.id}`,
@@ -62,7 +63,7 @@ export async function generateMetadata(
 
     twitter: {
       card: 'summary_large_image',
-      title: `${protocol.name} - ${protocol.apy || 'N/A'}% APY`,
+      title: `${protocol.name} - ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}% APY` : 'APY N/A'}`,
       description: `Safety Score: ${protocol.safetyScore || 'N/A'}/100 | TVL: ${tvlFormatted}`,
       images: [`${siteUrl}${defaultOgImage}`],
     },
@@ -95,12 +96,13 @@ const protocolMapping: Record<string, string> = {
 };
 
 // 固定APY値（フォールバック用）
-const fallbackAPY: Record<string, number> = {
-  'lido': 3.8,
-  'rocket-pool': 4.1,
-  'aave-v3': 2.5,
-  'compound-v3': 2.8,
-  'curve': 5.2
+// DeFiLlamaのライブデータよりも代表的な値を使用
+const fallbackAPY: Record<string, number | null> = {
+  'lido': 2.6,        // ETHステーキング標準的なAPY
+  'rocket-pool': 2.4,  // ETHステーキング（若干低め）
+  'aave-v3': 3.5,     // 主要レンディングプールの平均的APY
+  'compound-v3': null,  // データなしの場合は推定値を使わない
+  'curve': 5.2        // ステーブルコインプールの平均
 };
 
 // タイムアウト付きfetch関数
@@ -129,17 +131,59 @@ async function fetchProtocolData(id: string) {
       return null;
     }
 
-    // DeFiLlama APIを直接呼び出し（タイムアウト付き）
+    // Fetch TVL data from DeFiLlama Protocol API and APY data from Yields API in parallel
+    const [protoData, apyData] = await Promise.all([
+      fetchProtocolTVL(defiLlamaId),
+      getProtocolAPY(id)
+    ]);
+
+    // Get APY range for display
+    const apyRange = await getProtocolAPYRange(id);
+
+    const data = {
+      id,
+      name: protoData.name || id,
+      apy: apyData.apy !== null ? apyData.apy : fallbackAPY[id], // Use live APY or fallback (can be null)
+      apyRange, // Include APY range for display
+      tvl: protoData.tvl || 0,
+      chains: protoData.chains || ['Ethereum'],
+      audits: protoData.audits || null,
+      pools: apyData.pools, // Include pool data for transparency
+      lastUpdated: Date.now()
+    };
+
+    console.log(`[Page] Data processed for ${id}:`, {
+      ...data,
+      pools: `${data.pools?.length || 0} pools`
+    });
+    return data;
+  } catch (error: any) {
+    console.error(`[Page] Failed to fetch data for ${id}:`, error.message || error);
+    // エラー時は共通設定からフォールバック値を返す
+    const configData = getProtocolBySlug(id);
+    return {
+      id,
+      name: configData?.name || id,
+      apy: fallbackAPY[id] !== undefined ? fallbackAPY[id] : configData?.fallbackData?.apy,
+      apyRange: { min: 0, max: 0, average: 0 },
+      tvl: configData?.fallbackData?.tvl || 0,
+      chains: configData?.chains || ['Ethereum'],
+      error: true,
+      errorMessage: error.name === 'AbortError' ? 'Request timeout' : error.message
+    };
+  }
+}
+
+// Helper function to fetch TVL data from DeFiLlama
+async function fetchProtocolTVL(defiLlamaId: string) {
+  try {
     const protoUrl = `https://api.llama.fi/protocol/${defiLlamaId}`;
-    console.log(`[Page] Fetching from DeFiLlama: ${protoUrl}`);
+    console.log(`[Page] Fetching TVL from DeFiLlama: ${protoUrl}`);
 
     const res = await fetchWithTimeout(protoUrl, 10000); // 10秒タイムアウト
 
     if (res.ok) {
       const protoJson = await res.json();
-
-      // データ抽出
-      const apy = fallbackAPY[id] || 0;
 
       // TVL計算
       let tvl = 0;
@@ -152,38 +196,19 @@ async function fetchProtocolData(id: string) {
         tvl = lastEntry.totalLiquidityUSD || 0;
       }
 
-      // チェーン情報
-      const chains = protoJson.chains || ['Ethereum'];
-
-      const data = {
-        id,
-        name: protoJson.name || id,
-        apy,
+      return {
+        name: protoJson.name,
         tvl,
-        chains,
-        audits: protoJson.audits || null,
-        lastUpdated: Date.now()
+        chains: protoJson.chains || ['Ethereum'],
+        audits: protoJson.audits || null
       };
-
-      console.log(`[Page] Data processed for ${id}:`, data);
-      return data;
     } else {
       console.error(`[Page] DeFiLlama API failed with status ${res.status}`);
-      return null;
+      return { name: '', tvl: 0, chains: ['Ethereum'], audits: null };
     }
-  } catch (error: any) {
-    console.error(`[Page] Failed to fetch data for ${id}:`, error.message || error);
-    // エラー時は共通設定からフォールバック値を返す
-    const configData = getProtocolBySlug(id);
-    return {
-      id,
-      name: configData?.name || id,
-      apy: fallbackAPY[id] || configData?.fallbackData?.apy || 0,
-      tvl: configData?.fallbackData?.tvl || 0,
-      chains: configData?.chains || ['Ethereum'],
-      error: true,
-      errorMessage: error.name === 'AbortError' ? 'Request timeout' : error.message
-    };
+  } catch (error) {
+    console.error(`[Page] Failed to fetch TVL:`, error);
+    return { name: '', tvl: 0, chains: ['Ethereum'], audits: null };
   }
 }
 
@@ -266,10 +291,15 @@ export default async function ProtocolDetailPage({
         {/* 統計情報 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-gray-900 p-6 rounded-lg">
-            <div className="text-gray-400 text-sm mb-2">APY</div>
+            <div className="text-gray-400 text-sm mb-2">APY (Live)</div>
             <div className="text-2xl font-bold text-green-400">
-              {protocol.apy ? `${protocol.apy}%` : 'N/A'}
+              {protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}%` : '--'}
             </div>
+            {protocol.apyRange && protocol.apyRange.min > 0 && (
+              <div className="text-xs text-gray-400 mt-2">
+                Range: {protocol.apyRange.min.toFixed(2)}% - {protocol.apyRange.max.toFixed(2)}%
+              </div>
+            )}
           </div>
           <div className="bg-gray-900 p-6 rounded-lg">
             <div className="text-gray-400 text-sm mb-2">Total Value Locked</div>

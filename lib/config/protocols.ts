@@ -163,7 +163,7 @@ export const protocolConfig: Record<string, ProtocolConfig> = {
       'Governance risk',
     ],
     fallbackData: {
-      apy: 2.8,
+      apy: null,  // No estimated values for Compound V3
       tvl: 2_500_000_000,
     },
     defiLlamaId: 'compound-finance',

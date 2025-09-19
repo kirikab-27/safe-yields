@@ -12,9 +12,11 @@ import CompoundCard from '@/components/CompoundCard';
 import CurveCard from '@/components/CurveCard';
 import EmailCapture from '@/components/EmailCapture';
 import protocolsData from '@/data/protocols.json';
+import { useAPYData } from '@/hooks/useAPYData';
 
 export default function Home() {
   const [protocols] = useState<Protocol[]>(protocolsData as Protocol[]);
+  const { apyData, loading: apyLoading } = useAPYData();
   const [filters, setFilters] = useState<FilterOptions>({
     category: 'All',
     chain: 'All',
@@ -59,6 +61,12 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-4">
               <a
+                href="/tools/gas-calculator"
+                className="text-sm text-green-400 hover:text-green-300 transition-colors font-medium"
+              >
+                ⛽ Gas Calculator
+              </a>
+              <a
                 href="/test-api"
                 className="text-xs text-green-400 hover:text-green-300 transition-colors"
               >
@@ -90,15 +98,15 @@ export default function Home() {
             const isCurve = protocol.name === 'Curve Finance';
 
             if (isLido) {
-              return <LidoCard key={protocol.id} />;
+              return <LidoCard key={protocol.id} liveApy={apyData['lido']} />;
             } else if (isRocketPool) {
-              return <RocketPoolCard key={protocol.id} />;
+              return <RocketPoolCard key={protocol.id} liveApy={apyData['rocket-pool']} />;
             } else if (isAave) {
-              return <AaveCard key={protocol.id} />;
+              return <AaveCard key={protocol.id} liveApy={apyData['aave-v3']} />;
             } else if (isCompound) {
-              return <CompoundCard key={protocol.id} />;
+              return <CompoundCard key={protocol.id} liveApy={apyData['compound-v3']} />;
             } else if (isCurve) {
-              return <CurveCard key={protocol.id} />;
+              return <CurveCard key={protocol.id} liveApy={apyData['curve']} />;
             } else {
               return <ProtocolCard key={protocol.id} protocol={protocol} />;
             }

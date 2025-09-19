@@ -3,7 +3,11 @@
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
-export default function CompoundCard() {
+interface CompoundCardProps {
+  liveApy?: number;
+}
+
+export default function CompoundCard({ liveApy }: CompoundCardProps) {
   const { data, error, isLoading, isFromCache } = useProtocolData('compound-v3');
 
   const getRiskColor = (risk: string) => {
@@ -33,7 +37,7 @@ export default function CompoundCard() {
     chain: 'Multi-chain',
     category: 'Lending',
     tvl: '$2.8B',
-    apy: '2.8',
+    apy: null,  // No estimated values for Compound V3
     safetyScore: 94,
     risk: 'LOW',
     audits: ['OpenZeppelin', 'ChainSecurity', 'Certora', 'Gauntlet'],
@@ -88,7 +92,7 @@ export default function CompoundCard() {
             {/* APY */}
             <div className="text-right">
               <div className="text-4xl font-bold text-green-400">
-                {staticData.apy}%
+                {staticData.apy !== null ? `${staticData.apy}%` : '--'}
               </div>
               <div className="text-xs text-gray-500 uppercase tracking-wider">USDC APY</div>
             </div>
@@ -120,7 +124,14 @@ export default function CompoundCard() {
   // APIデータまたは静的データを使用
   const displayData = data || staticData;
   const tvl = data ? formatTVL(data.tvl) : staticData.tvl;
-  const apy = data ? data.apy.toFixed(1) : staticData.apy;
+  // Handle null APY values by showing "--"
+  const apy = liveApy !== undefined && liveApy !== null
+    ? liveApy.toFixed(1)
+    : data?.apy !== null && data?.apy !== undefined
+      ? data.apy.toFixed(1)
+      : staticData.apy !== null
+        ? staticData.apy.toString()
+        : '--';
 
   return (
     <Link href="/protocols/compound-v3" className="block">
@@ -196,7 +207,7 @@ export default function CompoundCard() {
           {/* APY */}
           <div className="text-right">
             <div className="text-4xl font-bold text-green-400">
-              {apy}%
+              {apy}{apy !== '--' ? '%' : ''}
             </div>
             <div className="text-xs text-gray-500 uppercase tracking-wider">USDC APY</div>
           </div>

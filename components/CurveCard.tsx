@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
-export default function CurveCard() {
+export default function CurveCard({ liveApy }: CurveCardProps) {
   const { data, error, isLoading, isFromCache } = useProtocolData('curve');
 
   const getRiskColor = (risk: string) => {
@@ -120,7 +120,7 @@ export default function CurveCard() {
   // APIデータまたは静的データを使用
   const displayData = data || staticData;
   const tvl = data ? formatTVL(data.tvl) : staticData.tvl;
-  const apy = data ? data.apy.toFixed(1) : staticData.apy;
+  const apy = liveApy !== undefined ? liveApy.toFixed(1) : data ? data.apy.toFixed(1) : staticData.apy;
 
   return (
     <Link href="/protocols/curve" className="block">

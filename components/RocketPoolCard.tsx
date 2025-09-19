@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
 
-export default function RocketPoolCard() {
+export default function RocketPoolCard({ liveApy }: RocketPoolCardProps) {
   const { data, error, isLoading, isFromCache } = useProtocolData('rocket-pool');
 
   const getRiskColor = (risk: string) => {
@@ -86,7 +86,9 @@ export default function RocketPoolCard() {
               <div className="text-4xl font-bold text-green-400">
                 {staticData.apy}%
               </div>
-              <div className="text-xs text-gray-500 uppercase tracking-wider">APY</div>
+              <div className="text-xs text-gray-500 uppercase tracking-wider">
+              APY {liveApy !== undefined && <span className="text-green-400">(Live)</span>}
+            </div>
             </div>
 
             {/* Safety Score */}
@@ -116,7 +118,7 @@ export default function RocketPoolCard() {
   // APIデータまたは静的データを使用
   const displayData = data || staticData;
   const tvl = data ? formatTVL(data.tvl) : staticData.tvl;
-  const apy = data ? data.apy.toFixed(1) : staticData.apy;
+  const apy = liveApy !== undefined ? liveApy.toFixed(1) : data ? data.apy.toFixed(1) : staticData.apy;
 
   return (
     <Link href="/protocols/rocket-pool" className="block">
@@ -186,7 +188,9 @@ export default function RocketPoolCard() {
             <div className="text-4xl font-bold text-green-400">
               {apy}%
             </div>
-            <div className="text-xs text-gray-500 uppercase tracking-wider">APY</div>
+            <div className="text-xs text-gray-500 uppercase tracking-wider">
+              APY {liveApy !== undefined && <span className="text-green-400">(Live)</span>}
+            </div>
           </div>
 
           {/* Safety Score */}

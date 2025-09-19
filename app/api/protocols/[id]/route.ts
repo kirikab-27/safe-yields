@@ -29,11 +29,11 @@ const protocolMapping: Record<string, string> = {
 };
 
 // 固定APY値（フォールバック用）
-const fallbackAPY: Record<string, number> = {
+const fallbackAPY: Record<string, number | null> = {
   'lido': 3.8,
   'rocket-pool': 4.1,
   'aave-v3': 2.5,
-  'compound-v3': 2.8,
+  'compound-v3': null,  // No estimated values for Compound V3
   'curve': 5.2
 };
 
