@@ -11,7 +11,7 @@ interface ProtocolData {
   id: string;
   name: string;
   tvl: number;
-  apy: number;
+  apy: number | null;
   chains?: string[];
   audits?: string | number;
   lastUpdated: number;
@@ -76,7 +76,7 @@ async function fetchProtocolData(protocolId: string): Promise<ProtocolData | nul
   try {
     const data = await fetchWithRetry(async () => {
       // Protocol-specific endpoints
-      const endpoints: { [key: string]: { protocol: string; pools: string; fallbackApy: number } } = {
+      const endpoints: { [key: string]: { protocol: string; pools: string; fallbackApy: number | null } } = {
         'lido': {
           protocol: `${DEFILLAMA}/protocol/lido`,
           pools: `${DEFILLAMA}/pools2?project=lido`,
