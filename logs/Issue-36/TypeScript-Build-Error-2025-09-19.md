@@ -60,9 +60,23 @@ if (apy !== null) {
 }
 ```
 
+## 追加エラー2 (21:07)
+```
+Type error: 'data.apy' is possibly 'null'.
+  48 | const apy = data ? data.apy.toFixed(1) : staticData.apy;
+```
+
+### 追加修正2
+`page-optimized.tsx`でもnullチェックを追加:
+```typescript
+const apy = data?.apy !== null && data?.apy !== undefined
+  ? data.apy.toFixed(1)
+  : staticData.apy;
+```
+
 ## テスト結果
 - ローカルビルドテスト: ✅ 成功
-- TypeScriptコンパイル: ✅ エラー解消 (2回目)
+- TypeScriptコンパイル: ✅ エラー解消 (3回目)
 - Vercelデプロイ: 🔄 再実行中
 
 ## 今後の対応

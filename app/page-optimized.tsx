@@ -45,7 +45,9 @@ function OptimizedProtocolCard({
   // Use live data if available, otherwise use static data
   const displayData = data || staticData;
   const tvl = data ? formatTVL(data.tvl) : staticData.tvl;
-  const apy = data ? data.apy.toFixed(1) : staticData.apy;
+  const apy = data?.apy !== null && data?.apy !== undefined
+    ? data.apy.toFixed(1)
+    : staticData.apy;
 
   // Get protocol-specific emoji
   const getProtocolEmoji = (id: string) => {
