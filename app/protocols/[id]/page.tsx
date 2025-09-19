@@ -295,7 +295,10 @@ export default async function ProtocolDetailPage({
             <div className="text-2xl font-bold text-green-400">
               {protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}%` : '--'}
             </div>
-            {protocol.apyRange && protocol.apyRange.min > 0 && (
+            {'apyRange' in protocol && protocol.apyRange &&
+             typeof protocol.apyRange === 'object' &&
+             'min' in protocol.apyRange &&
+             protocol.apyRange.min > 0 && (
               <div className="text-xs text-gray-400 mt-2">
                 Range: {protocol.apyRange.min.toFixed(2)}% - {protocol.apyRange.max.toFixed(2)}%
               </div>

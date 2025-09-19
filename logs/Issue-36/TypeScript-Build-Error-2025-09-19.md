@@ -74,9 +74,24 @@ const apy = data?.apy !== null && data?.apy !== undefined
   : staticData.apy;
 ```
 
+## 追加エラー3 (21:10)
+```
+Type error: Property 'apyRange' does not exist on type
+  298 | {protocol.apyRange && protocol.apyRange.min > 0 && (
+```
+
+### 追加修正3
+`protocols/[id]/page.tsx`で`apyRange`プロパティの存在チェックを追加:
+```typescript
+{'apyRange' in protocol && protocol.apyRange &&
+ typeof protocol.apyRange === 'object' &&
+ 'min' in protocol.apyRange &&
+ protocol.apyRange.min > 0 && (
+```
+
 ## テスト結果
 - ローカルビルドテスト: ✅ 成功
-- TypeScriptコンパイル: ✅ エラー解消 (3回目)
+- TypeScriptコンパイル: ✅ エラー解消 (4回目)
 - Vercelデプロイ: 🔄 再実行中
 
 ## 今後の対応
