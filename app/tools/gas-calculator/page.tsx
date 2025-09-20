@@ -125,8 +125,36 @@ export default function GasCalculator() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* ヘッダー */}
+      <header className="border-b border-gray-800 bg-black/90 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <span className="text-3xl">🛡️</span>
+                <h1 className="text-2xl font-bold">
+                  <span className="text-white">Safe</span>
+                  <span className="text-green-400"> Yields</span>
+                </h1>
+              </a>
+            </div>
+            <div className="flex items-center gap-4">
+              <a
+                href="/"
+                className="text-sm text-green-400 hover:text-green-300 transition-colors font-medium"
+              >
+                🏠 Home
+              </a>
+              <p className="text-xs text-gray-500 hidden sm:block">
+                Not Financial Advice. Always DYOR.
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* ヘッダー */}
+        {/* ページタイトル */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
             ⛽ Gas Fee Calculator
