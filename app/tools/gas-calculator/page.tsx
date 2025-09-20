@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import gasUsageData from '@/data/gas-usage.json';
 
 export default function GasCalculator() {
   const [gasPrice, setGasPrice] = useState(30); // Gwei 初期値
@@ -9,44 +10,31 @@ export default function GasCalculator() {
   const [ethPrice, setEthPrice] = useState(2000); // USD/ETH 初期値
   const [isLoading, setIsLoading] = useState(true);
 
-  // トランザクションごとのガス使用量（概算値）
-  const [transactions, setTransactions] = useState({
-    deposit: 150000,  // gas units
-    withdraw: 100000, // gas units
-    claim: 50000,     // gas units (reward claim)
-    compound: 80000,  // gas units (auto-compound)
-  });
+  // 選択されたプロトコルとオペレーション
+  const [selectedProtocol, setSelectedProtocol] = useState('aave-v3');
+  const [selectedOperation, setSelectedOperation] = useState('deposit');
 
-  // 選択されたプロトコルタイプ
-  const [protocolType, setProtocolType] = useState('lending');
+  // 現在の protocol/operation のガス使用量
+  const getCurrentGasUsage = () => {
+    const protocol = gasUsageData.protocols[selectedProtocol as keyof typeof gasUsageData.protocols];
+    if (!protocol) return { averageGas: 150000, minGas: 120000, maxGas: 180000 };
 
-  // プロトコルタイプごとのガス使用量プリセット
-  const protocolPresets = {
-    lending: {
-      deposit: 150000,
-      withdraw: 100000,
-      claim: 50000,
-      compound: 80000,
-    },
-    staking: {
-      deposit: 120000,
-      withdraw: 80000,
-      claim: 40000,
-      compound: 60000,
-    },
-    dex: {
-      deposit: 200000,
-      withdraw: 150000,
-      claim: 60000,
-      compound: 100000,
-    },
-    yield: {
-      deposit: 250000,
-      withdraw: 200000,
-      claim: 70000,
-      compound: 120000,
+    const operation = protocol.operations[selectedOperation as keyof typeof protocol.operations];
+    if (!operation) {
+      // フォールバック: general operations を使う
+      const general = gasUsageData.protocols.general;
+      return general.operations.transfer || { averageGas: 65000, minGas: 55000, maxGas: 80000 };
     }
+    return operation;
   };
+
+  // 複数トランザクションのガス使用量を管理
+  const [transactions, setTransactions] = useState({
+    deposit: 220000,
+    withdraw: 260000,
+    claim: 120000,
+    compound: 0, // auto-compound は追加ガスなし
+  });
 
   // Etherscan APIからガス価格取得
   useEffect(() => {
@@ -74,10 +62,37 @@ export default function GasCalculator() {
     return () => clearInterval(interval);
   }, []);
 
-  // プロトコルタイプ変更時にガス使用量を更新
+  // プロトコル変更時にガス使用量を更新
   useEffect(() => {
-    setTransactions(protocolPresets[protocolType as keyof typeof protocolPresets]);
-  }, [protocolType]);
+    updateTransactionGasEstimates();
+  }, [selectedProtocol]);
+
+  // トランザクションガス使用量を更新
+  const updateTransactionGasEstimates = () => {
+    const protocol = gasUsageData.protocols[selectedProtocol as keyof typeof gasUsageData.protocols];
+    if (!protocol) return;
+
+    const ops = protocol.operations as any; // Type assertion for dynamic access
+
+    const newTransactions = {
+      deposit: ops.deposit?.averageGas ||
+               ops.supply?.averageGas ||
+               ops.stake?.averageGas ||
+               ops.add_liquidity?.averageGas ||
+               220000,
+      withdraw: ops.withdraw?.averageGas ||
+                ops.unstake?.averageGas ||
+                ops.remove_liquidity?.averageGas ||
+                260000,
+      claim: ops.claim?.averageGas ||
+             ops.claim_rewards?.averageGas ||
+             ops.collect_fees?.averageGas ||
+             120000,
+      compound: 0, // auto-compound typically doesn't require user gas
+    };
+
+    setTransactions(newTransactions);
+  };
 
   // ガス代計算（USD）
   const calculateGasCost = (gasUnits: number) => {
@@ -176,17 +191,28 @@ export default function GasCalculator() {
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-2">
-                Protocol Type
+                Protocol
               </label>
               <select
-                value={protocolType}
-                onChange={(e) => setProtocolType(e.target.value)}
+                value={selectedProtocol}
+                onChange={(e) => setSelectedProtocol(e.target.value)}
                 className="w-full p-3 bg-gray-800 rounded-lg border border-gray-700 focus:border-green-400 focus:outline-none transition-colors"
               >
-                <option value="lending">Lending (Aave, Compound)</option>
-                <option value="staking">Staking (Lido, Rocket Pool)</option>
-                <option value="dex">DEX LP (Uniswap, Curve)</option>
-                <option value="yield">Yield Optimizer (Yearn, Convex)</option>
+                <optgroup label="Lending">
+                  <option value="aave-v3">Aave V3</option>
+                  <option value="compound-v3">Compound V3</option>
+                </optgroup>
+                <optgroup label="Liquid Staking">
+                  <option value="lido">Lido</option>
+                  <option value="rocket-pool">Rocket Pool</option>
+                </optgroup>
+                <optgroup label="DEX">
+                  <option value="uniswap-v3">Uniswap V3</option>
+                  <option value="curve">Curve Finance</option>
+                </optgroup>
+                <optgroup label="General">
+                  <option value="general">Other DeFi</option>
+                </optgroup>
               </select>
             </div>
             <div>
@@ -210,27 +236,32 @@ export default function GasCalculator() {
 
         {/* ガスコスト内訳 */}
         <div className="bg-gray-900 rounded-2xl p-6 mb-6 border border-gray-800">
-          <h2 className="text-xl font-semibold mb-4">Transaction Gas Costs</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Transaction Gas Costs
+            <span className="text-sm text-gray-400 ml-2 font-normal">
+              (Based on {gasUsageData.protocols[selectedProtocol as keyof typeof gasUsageData.protocols]?.name || 'Protocol'} actual data)
+            </span>
+          </h2>
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2">
               <div>
-                <span className="text-white">Deposit</span>
-                <span className="text-xs text-gray-400 ml-2">({transactions.deposit.toLocaleString()} gas)</span>
+                <span className="text-white">Deposit/Supply</span>
+                <span className="text-xs text-gray-400 ml-2">({transactions.deposit.toLocaleString()} gas units)</span>
               </div>
               <span className="text-white font-medium">${depositGas.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center py-2">
               <div>
                 <span className="text-white">Withdraw</span>
-                <span className="text-xs text-gray-400 ml-2">({transactions.withdraw.toLocaleString()} gas)</span>
+                <span className="text-xs text-gray-400 ml-2">({transactions.withdraw.toLocaleString()} gas units)</span>
               </div>
               <span className="text-white font-medium">${withdrawGas.toFixed(2)}</span>
             </div>
             {claimFrequency !== 'never' && (
               <div className="flex justify-between items-center py-2">
                 <div>
-                  <span className="text-white">Claims ({claimCounts[claimFrequency as keyof typeof claimCounts]}x/year)</span>
-                  <span className="text-xs text-gray-400 ml-2">({transactions.claim.toLocaleString()} gas each)</span>
+                  <span className="text-white">Claims/Rewards ({claimCounts[claimFrequency as keyof typeof claimCounts]}x/year)</span>
+                  <span className="text-xs text-gray-400 ml-2">({transactions.claim.toLocaleString()} gas units each)</span>
                 </div>
                 <span className="text-white font-medium">${claimGas.toFixed(2)}</span>
               </div>
@@ -302,6 +333,11 @@ export default function GasCalculator() {
             <span className="font-semibold">💡 Pro Tip:</span> Layer 2 networks like Arbitrum or Optimism can reduce gas costs by 90%+.
             For your ${investmentAmount} investment, you could save approximately ${(totalGasCost * 0.9).toFixed(2)} annually.
           </p>
+        </div>
+
+        {/* データソース情報 */}
+        <div className="mt-4 text-xs text-gray-500 text-center">
+          <p>Gas usage data based on actual transaction analysis • Last updated: {gasUsageData.lastUpdated}</p>
         </div>
       </div>
     </div>

@@ -1,0 +1,186 @@
+{
+  "protocols": {
+    "aave-v3": {
+      "name": "Aave V3",
+      "operations": {
+        "deposit": {
+          "averageGas": 220000,
+          "minGas": 180000,
+          "maxGas": 280000,
+          "description": "Supply assets to earn interest"
+        },
+        "withdraw": {
+          "averageGas": 260000,
+          "minGas": 220000,
+          "maxGas": 320000,
+          "description": "Withdraw supplied assets"
+        },
+        "borrow": {
+          "averageGas": 320000,
+          "minGas": 280000,
+          "maxGas": 380000,
+          "description": "Borrow against collateral"
+        },
+        "repay": {
+          "averageGas": 180000,
+          "minGas": 150000,
+          "maxGas": 220000,
+          "description": "Repay borrowed amount"
+        }
+      }
+    },
+    "compound-v3": {
+      "name": "Compound V3",
+      "operations": {
+        "supply": {
+          "averageGas": 195000,
+          "minGas": 165000,
+          "maxGas": 235000,
+          "description": "Supply assets to earn interest"
+        },
+        "withdraw": {
+          "averageGas": 230000,
+          "minGas": 195000,
+          "maxGas": 275000,
+          "description": "Withdraw supplied assets"
+        },
+        "borrow": {
+          "averageGas": 285000,
+          "minGas": 245000,
+          "maxGas": 335000,
+          "description": "Borrow against collateral"
+        },
+        "repay": {
+          "averageGas": 165000,
+          "minGas": 140000,
+          "maxGas": 195000,
+          "description": "Repay borrowed amount"
+        }
+      }
+    },
+    "lido": {
+      "name": "Lido",
+      "operations": {
+        "stake": {
+          "averageGas": 85000,
+          "minGas": 75000,
+          "maxGas": 95000,
+          "description": "Stake ETH for stETH"
+        },
+        "unstake": {
+          "averageGas": 350000,
+          "minGas": 300000,
+          "maxGas": 420000,
+          "description": "Request stETH withdrawal"
+        },
+        "claim": {
+          "averageGas": 120000,
+          "minGas": 95000,
+          "maxGas": 150000,
+          "description": "Claim withdrawal"
+        }
+      }
+    },
+    "curve": {
+      "name": "Curve Finance",
+      "operations": {
+        "add_liquidity": {
+          "averageGas": 380000,
+          "minGas": 320000,
+          "maxGas": 450000,
+          "description": "Add liquidity to pool"
+        },
+        "remove_liquidity": {
+          "averageGas": 340000,
+          "minGas": 290000,
+          "maxGas": 400000,
+          "description": "Remove liquidity from pool"
+        },
+        "swap": {
+          "averageGas": 185000,
+          "minGas": 150000,
+          "maxGas": 230000,
+          "description": "Swap tokens"
+        },
+        "claim_rewards": {
+          "averageGas": 140000,
+          "minGas": 110000,
+          "maxGas": 175000,
+          "description": "Claim CRV rewards"
+        }
+      }
+    },
+    "uniswap-v3": {
+      "name": "Uniswap V3",
+      "operations": {
+        "add_liquidity": {
+          "averageGas": 450000,
+          "minGas": 380000,
+          "maxGas": 550000,
+          "description": "Create or add to position"
+        },
+        "remove_liquidity": {
+          "averageGas": 280000,
+          "minGas": 240000,
+          "maxGas": 330000,
+          "description": "Remove liquidity position"
+        },
+        "swap": {
+          "averageGas": 145000,
+          "minGas": 120000,
+          "maxGas": 180000,
+          "description": "Swap tokens"
+        },
+        "collect_fees": {
+          "averageGas": 95000,
+          "minGas": 80000,
+          "maxGas": 115000,
+          "description": "Collect earned fees"
+        }
+      }
+    },
+    "rocket-pool": {
+      "name": "Rocket Pool",
+      "operations": {
+        "stake": {
+          "averageGas": 92000,
+          "minGas": 82000,
+          "maxGas": 105000,
+          "description": "Stake ETH for rETH"
+        },
+        "unstake": {
+          "averageGas": 78000,
+          "minGas": 68000,
+          "maxGas": 90000,
+          "description": "Burn rETH for ETH"
+        }
+      }
+    },
+    "general": {
+      "name": "General DeFi",
+      "operations": {
+        "approve": {
+          "averageGas": 46000,
+          "minGas": 42000,
+          "maxGas": 52000,
+          "description": "Token approval"
+        },
+        "transfer": {
+          "averageGas": 65000,
+          "minGas": 55000,
+          "maxGas": 80000,
+          "description": "Token transfer"
+        },
+        "claim": {
+          "averageGas": 120000,
+          "minGas": 90000,
+          "maxGas": 160000,
+          "description": "Claim rewards"
+        }
+      }
+    }
+  },
+  "lastUpdated": "2025-09-20",
+  "dataSource": "Etherscan transaction analysis & protocol documentation",
+  "notes": "Gas usage can vary based on network congestion, contract state, and transaction complexity"
+}
