@@ -5,12 +5,39 @@ import { protocolDataFetcher } from '@/lib/data/protocol-fetcher';
 // GET /api/yields - Fetch live APY data for all protocols
 export async function GET() {
   try {
-    const protocols = ['lido', 'rocket-pool', 'aave-v3', 'compound-v3', 'curve'];
+    const protocols = ['lido', 'rocket-pool', 'aave-v3', 'compound-v3', 'curve', 'uniswap-v3'];
 
     // Fetch APY data for all protocols in parallel
     const apyPromises = protocols.map(async (protocolId) => {
       // Use new fetcher for supported protocols
       const supportedProtocols = ['lido', 'compound-v3', 'aave-v3'];
+
+      // Special handling for Uniswap V3
+      if (protocolId === 'uniswap-v3') {
+        try {
+          // Dynamic import to avoid build issues
+          const { fetchUniswapV3Data } = await import('@/lib/data/protocols/uniswap-v3');
+          const uniswapData = await fetchUniswapV3Data();
+
+          if (uniswapData && uniswapData.topPools.length > 0) {
+            const avgApy = uniswapData.topPools.reduce((sum, pool) => sum + pool.apy, 0) / uniswapData.topPools.length;
+            console.log(`[Yields API] uniswap-v3: APY=${avgApy.toFixed(2)} (from ${uniswapData.topPools.length} pools)`);
+            return {
+              id: protocolId,
+              apy: avgApy,
+              poolCount: uniswapData.poolCount
+            };
+          }
+        } catch (error) {
+          console.error(`[Yields API] Error fetching Uniswap V3 data:`, error);
+        }
+        // Fallback to default APY
+        return {
+          id: protocolId,
+          apy: 5.2,
+          poolCount: 0
+        };
+      }
 
       if (supportedProtocols.includes(protocolId)) {
         const data = await protocolDataFetcher.fetch(protocolId);

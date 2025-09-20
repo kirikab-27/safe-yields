@@ -16,7 +16,8 @@ export async function generateStaticParams() {
     { id: 'rocket-pool' },
     { id: 'aave-v3' },
     { id: 'compound-v3' },
-    { id: 'curve' }
+    { id: 'curve' },
+    { id: 'uniswap-v3' }
   ];
 }
 
@@ -26,6 +27,15 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   // 共通設定から取得（slugベースで検索）
   const configData = getProtocolBySlug(params.id);
+
+  // デバッグログ
+  if (!configData) {
+    console.log(`[Metadata] Config not found for slug: ${params.id}`);
+    // Show all available protocol keys for debugging
+    const { protocolConfig } = await import('@/lib/config/protocols');
+    console.log('[Metadata] Available protocols:', Object.keys(protocolConfig));
+  }
+
   const staticData = protocolStaticData[params.id] || {};
   const dynamicData = await fetchProtocolData(params.id);
   const protocol = { ...configData, ...staticData, ...dynamicData };
@@ -42,12 +52,12 @@ export async function generateMetadata(
     : 'N/A';
 
   return {
-    title: `${protocol.name || params.id} - APY ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}%` : 'N/A'} | ${siteName}`,
-    description: `${protocol.name}の安全性スコア、APY、TVL、監査情報を確認。DeFi投資のリスクを可視化。現在のAPY: ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}%` : 'N/A'}、TVL: ${tvlFormatted}、安全性スコア: ${protocol.safetyScore || 'N/A'}/100`,
+    title: `${protocol.name || params.id} - APY ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy.toFixed(2)}%` : 'N/A'} | ${siteName}`,
+    description: `${protocol.name}の安全性スコア、APY、TVL、監査情報を確認。DeFi投資のリスクを可視化。現在のAPY: ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy.toFixed(2)}%` : 'N/A'}、TVL: ${tvlFormatted}、安全性スコア: ${protocol.safetyScore || 'N/A'}/100`,
     keywords: `${protocol.name}, DeFi, yield farming, APY, TVL, safety score, staking, ${params.id}`,
 
     openGraph: {
-      title: `${protocol.name} Safety Analysis - ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}% APY` : 'APY N/A'}`,
+      title: `${protocol.name} Safety Analysis - ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy.toFixed(2)}% APY` : 'APY N/A'}`,
       description: `安全性スコア: ${protocol.safetyScore || 'N/A'}/100。${protocol.description?.substring(0, 100) || 'DeFi投資の透明性を提供'}`,
       type: 'website',
       url: `${siteUrl}/protocols/${params.id}`,
@@ -63,7 +73,7 @@ export async function generateMetadata(
 
     twitter: {
       card: 'summary_large_image',
-      title: `${protocol.name} - ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}% APY` : 'APY N/A'}`,
+      title: `${protocol.name} - ${protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy.toFixed(2)}% APY` : 'APY N/A'}`,
       description: `Safety Score: ${protocol.safetyScore || 'N/A'}/100 | TVL: ${tvlFormatted}`,
       images: [`${siteUrl}${defaultOgImage}`],
     },
@@ -92,7 +102,8 @@ const protocolMapping: Record<string, string> = {
   'rocket-pool': 'rocket-pool',
   'aave-v3': 'aave',
   'compound-v3': 'compound-finance',
-  'curve': 'curve-dex'
+  'curve': 'curve-dex',
+  'uniswap-v3': 'uniswap-v3'
 };
 
 // 固定APY値（フォールバック用）
@@ -102,7 +113,8 @@ const fallbackAPY: Record<string, number | null> = {
   'rocket-pool': 2.4,  // ETHステーキング（若干低め）
   'aave-v3': 3.5,     // 主要レンディングプールの平均的APY
   'compound-v3': null,  // データなしの場合は推定値を使わない
-  'curve': 5.2        // ステーブルコインプールの平均
+  'curve': 5.2,       // ステーブルコインプールの平均
+  'uniswap-v3': 5.2   // 主要プールの平均的APY
 };
 
 // タイムアウト付きfetch関数
@@ -129,6 +141,40 @@ async function fetchProtocolData(id: string) {
     if (!defiLlamaId) {
       console.error(`[Page] Protocol not found: ${id}`);
       return null;
+    }
+
+    // Special handling for Uniswap V3 - Use mock data only to avoid performance issues
+    if (id === 'uniswap-v3') {
+      // Dynamic import to avoid build issues
+      const { getMockUniswapV3Data } = await import('@/lib/data/protocols/uniswap-v3');
+      const uniswapData = getMockUniswapV3Data();
+
+      // Skip DeFiLlama API call - use static data
+      const staticConfig = getProtocolBySlug(id);
+
+      if (uniswapData) {
+        // Calculate average APY from top pools
+        const averageAPY = uniswapData.topPools.length > 0
+          ? uniswapData.topPools.reduce((sum, pool) => sum + pool.apy, 0) / uniswapData.topPools.length
+          : fallbackAPY[id];
+
+        return {
+          id,
+          name: 'Uniswap V3',
+          apy: averageAPY,
+          apyRange: {
+            min: Math.min(...uniswapData.topPools.map(p => p.apy)),
+            max: Math.max(...uniswapData.topPools.map(p => p.apy)),
+            average: averageAPY || 0
+          },
+          tvl: uniswapData.tvl || staticConfig?.fallbackData?.tvl || 4500000000,
+          chains: staticConfig?.chains || ['Ethereum', 'Polygon', 'Arbitrum', 'Optimism', 'Base'],
+          audits: staticConfig?.audits || null,
+          pools: uniswapData.topPools,
+          lastUpdated: Date.now(),
+          fromCache: true
+        };
+      }
     }
 
     // Fetch TVL data from DeFiLlama Protocol API and APY data from Yields API in parallel
@@ -220,6 +266,11 @@ export default async function ProtocolDetailPage({
   // 共通設定から取得（slugベースで検索）
   const configData = getProtocolBySlug(params.id);
 
+  // デバッグログ
+  if (!configData) {
+    console.log(`[Page] Config not found for slug: ${params.id}`);
+  }
+
   // 静的データを取得（後方互換性のため残す）
   const staticData = protocolStaticData[params.id] || {};
 
@@ -257,7 +308,7 @@ export default async function ProtocolDetailPage({
       name: protocol.name,
       url: protocol.website
     },
-    annualPercentageRate: protocol.apy,
+    annualPercentageRate: protocol.apy !== null && protocol.apy !== undefined ? parseFloat(protocol.apy.toFixed(2)) : undefined,
     url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://safe-yields.com'}/protocols/${params.id}`,
     aggregateRating: protocol.safetyScore ? {
       '@type': 'AggregateRating',
@@ -293,7 +344,7 @@ export default async function ProtocolDetailPage({
           <div className="bg-gray-900 p-6 rounded-lg">
             <div className="text-gray-400 text-sm mb-2">APY (Live)</div>
             <div className="text-2xl font-bold text-green-400">
-              {protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy}%` : '--'}
+              {protocol.apy !== null && protocol.apy !== undefined ? `${protocol.apy.toFixed(2)}%` : '--'}
             </div>
             {'apyRange' in protocol && protocol.apyRange &&
              typeof protocol.apyRange === 'object' &&

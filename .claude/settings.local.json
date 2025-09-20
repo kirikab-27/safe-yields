@@ -44,7 +44,13 @@
       "Bash(\"/c/Program Files/GitHub CLI/gh\" issue edit 39 --repo kirikab-27/safe-yields --body-file issue-39-polish.md)",
       "Bash(/c/Program Files/GitHub CLI/gh issue edit 39 --repo kirikab-27/safe-yields --body-file issue-39-final.md)",
       "Bash(\"/c/Program Files/GitHub CLI/gh\" issue edit 39 --repo kirikab-27/safe-yields --body-file issue-39-corrected.md)",
-      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 41 --repo kirikab-27/safe-yields)"
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue view 41 --repo kirikab-27/safe-yields)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue create --repo kirikab-27/safe-yields --title \"[新機能] Uniswap V3 専用カードコンポーネントの実装\" --body-file issue-uniswap-v3.md --label enhancement --label high-priority)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue create --repo kirikab-27/safe-yields --title \"[新機能] Uniswap V3 専用カードコンポーネントの実装\" --body-file issue-uniswap-v3.md --label enhancement)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue create --repo kirikab-27/safe-yields --title \"[新機能] 未実装プロトコルの専用カードコンポーネント開発 (GMX, Yearn等)\" --body-file issue-unimplemented-protocols.md --label enhancement)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" project item-add 7 --owner kirikab-27 --url https://github.com/kirikab-27/safe-yields/issues/42)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" project item-add 7 --owner kirikab-27 --url https://github.com/kirikab-27/safe-yields/issues/43)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" issue edit 42 --repo kirikab-27/safe-yields --body-file issue-42-enhanced.md)"
     ],
     "deny": [],
     "ask": []

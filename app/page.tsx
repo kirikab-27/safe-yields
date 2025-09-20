@@ -10,6 +10,7 @@ import RocketPoolCard from '@/components/RocketPoolCard';
 import AaveCard from '@/components/AaveCard';
 import CompoundCard from '@/components/CompoundCard';
 import CurveCard from '@/components/CurveCard';
+import UniswapV3Card from '@/components/UniswapV3Card';
 import EmailCapture from '@/components/EmailCapture';
 import protocolsData from '@/data/protocols.json';
 import { useAPYData } from '@/hooks/useAPYData';
@@ -90,12 +91,13 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid gap-6">
           {filteredProtocols.map((protocol) => {
-            // Lido、Rocket Pool、Aave V3、Compound V3、Curve Financeはリアルタイムデータを使用
+            // 各プロトコル専用カードの判定
             const isLido = protocol.name === 'Lido';
             const isRocketPool = protocol.name === 'Rocket Pool';
             const isAave = protocol.name === 'Aave V3';
             const isCompound = protocol.name === 'Compound V3';
             const isCurve = protocol.name === 'Curve Finance';
+            const isUniswapV3 = protocol.name === 'Uniswap V3';
 
             if (isLido) {
               return <LidoCard key={protocol.id} liveApy={apyData['lido']} />;
@@ -107,6 +109,18 @@ export default function Home() {
               return <CompoundCard key={protocol.id} liveApy={apyData['compound-v3']} />;
             } else if (isCurve) {
               return <CurveCard key={protocol.id} liveApy={apyData['curve']} />;
+            } else if (isUniswapV3) {
+              return <UniswapV3Card
+                key={protocol.id}
+                initialData={{
+                  name: protocol.name,
+                  category: protocol.category,
+                  chain: protocol.chain,
+                  risk: protocol.risk,
+                  safetyScore: protocol.safetyScore
+                }}
+                liveApy={apyData['uniswap-v3']}
+              />;
             } else {
               return <ProtocolCard key={protocol.id} protocol={protocol} />;
             }

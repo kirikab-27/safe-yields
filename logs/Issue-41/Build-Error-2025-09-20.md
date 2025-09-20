@@ -31,4 +31,5 @@ Error:
 
 ## 結果
 - ✅ ローカルビルド成功
-- ✅ Vercelデプロイ成功
+- ✅ 修正をGitHubにプッシュ完了（commit: 268ce70）
+- ⏳ Vercelデプロイ中

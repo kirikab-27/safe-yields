@@ -124,5 +124,30 @@ export const protocolStaticData: Record<string, {
       'Peg deviation risk',
       'Governance attack risk'
     ]
+  },
+  'uniswap-v3': {
+    name: 'Uniswap V3',
+    description: 'Uniswap V3 is a decentralized exchange protocol featuring concentrated liquidity, allowing liquidity providers to allocate capital within custom price ranges for greater capital efficiency.',
+    website: 'https://app.uniswap.org',
+    docs: 'https://docs.uniswap.org',
+    audit: 'https://github.com/Uniswap/v3-core/tree/main/audits',
+    safetyScore: 94,
+    apy: undefined,  // Will be fetched from API
+    tvl: undefined,   // Will be fetched from API
+    features: [
+      'Concentrated liquidity positions',
+      'Multiple fee tiers (0.01%, 0.05%, 0.3%, 1%)',
+      'Capital efficiency up to 4000x',
+      'Range orders and limit orders',
+      'NFT positions for liquidity',
+      'Oracle functionality built-in'
+    ],
+    risks: [
+      'Smart contract risk',
+      'Impermanent loss (amplified in V3)',
+      'Complex position management',
+      'MEV exploitation risk',
+      'Gas costs for position management'
+    ]
   }
 };
