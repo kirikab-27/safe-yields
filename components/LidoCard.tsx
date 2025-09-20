@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
+import { APYDisplay } from './APYDisplay';
 
 interface LidoCardProps {
   liveApy?: number | null;
@@ -196,12 +197,13 @@ export default function LidoCard({ liveApy }: LidoCardProps) {
         <div className="flex flex-col items-end gap-4 ml-8">
           {/* APY */}
           <div className="text-right">
-            <div className="text-4xl font-bold text-green-400">
-              {apy}%
-            </div>
-            <div className="text-xs text-gray-500 uppercase tracking-wider">
-              APY {liveApy !== undefined && <span className="text-green-400">(Live)</span>}
-            </div>
+            <APYDisplay
+              protocolId="lido"
+              apy={liveApy !== undefined ? liveApy : data?.apy !== null && data?.apy !== undefined ? data.apy : parseFloat(staticData.apy)}
+              isLive={liveApy !== undefined || !isFromCache && data !== null}
+              source={isFromCache ? 'cached' : data ? 'protocol' : 'fallback'}
+            />
+            <div className="text-xs text-gray-500 uppercase tracking-wider mt-1">APY</div>
           </div>
 
           {/* Safety Score */}

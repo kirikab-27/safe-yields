@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useProtocolData } from '@/hooks/useProtocolData';
+import { APYDisplay } from './APYDisplay';
 
 interface AaveCardProps {
   liveApy?: number | null;
@@ -196,10 +197,13 @@ export default function AaveCard({ liveApy }: AaveCardProps) {
         <div className="flex flex-col items-end gap-4 ml-8">
           {/* APY */}
           <div className="text-right">
-            <div className="text-4xl font-bold text-green-400">
-              {apy}%
-            </div>
-            <div className="text-xs text-gray-500 uppercase tracking-wider">Supply APY</div>
+            <APYDisplay
+              protocolId="aave-v3"
+              apy={liveApy !== undefined ? liveApy : data?.apy !== null && data?.apy !== undefined ? data.apy : parseFloat(staticData.apy)}
+              isLive={liveApy !== undefined || !isFromCache && data !== null}
+              source={isFromCache ? 'cached' : data ? 'protocol' : 'fallback'}
+            />
+            <div className="text-xs text-gray-500 uppercase tracking-wider mt-1">Supply APY</div>
           </div>
 
           {/* Safety Score */}

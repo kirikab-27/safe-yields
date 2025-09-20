@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { globalCache } from '@/lib/cache/globalCache';
+import { protocolDataFetcher } from '@/lib/data/protocol-fetcher';
 
 const DEFILLAMA = process.env.DEFI_LLAMA_BASE ?? 'https://api.llama.fi';
 const BATCH_DELAY = 100;              // ms between chunks
@@ -66,7 +67,31 @@ async function fetchWithRetry<T>(
 
 // Fetch individual protocol data
 async function fetchProtocolData(protocolId: string): Promise<ProtocolData | null> {
-  // Check cache first
+  // Use new protocol fetcher for supported protocols
+  const supportedProtocols = ['lido', 'compound-v3', 'aave-v3'];
+
+  if (supportedProtocols.includes(protocolId)) {
+    try {
+      const data = await protocolDataFetcher.fetch(protocolId);
+      if (data) {
+        return {
+          id: protocolId,
+          name: protocolId === 'lido' ? 'Lido' : 'Compound V3',
+          tvl: data.tvl || 0,
+          apy: data.apy,
+          chains: [],
+          audits: '0',
+          lastUpdated: Date.now(),
+          source: data.source as any,
+          _cached: data.fromCache || false
+        };
+      }
+    } catch (error) {
+      console.error(`[Batch] Protocol fetcher failed for ${protocolId}:`, error);
+    }
+  }
+
+  // Check cache first for other protocols
   const cacheKey = `protocol:${protocolId}`;
   const cached = globalCache.get<ProtocolData>(cacheKey);
   if (cached) {

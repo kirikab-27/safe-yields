@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getProtocolAPY } from '@/lib/data/apy-fetcher';
+import { protocolDataFetcher } from '@/lib/data/protocol-fetcher';
 
 // GET /api/yields - Fetch live APY data for all protocols
 export async function GET() {
@@ -8,6 +9,20 @@ export async function GET() {
 
     // Fetch APY data for all protocols in parallel
     const apyPromises = protocols.map(async (protocolId) => {
+      // Use new fetcher for supported protocols
+      const supportedProtocols = ['lido', 'compound-v3', 'aave-v3'];
+
+      if (supportedProtocols.includes(protocolId)) {
+        const data = await protocolDataFetcher.fetch(protocolId);
+        console.log(`[Yields API] ${protocolId}: APY=${data?.apy} (source: ${data?.source})`);
+        return {
+          id: protocolId,
+          apy: data?.apy !== undefined ? data.apy : null,
+          poolCount: 0
+        };
+      }
+
+      // Fallback to original fetcher for other protocols
       const { apy, pools } = await getProtocolAPY(protocolId);
       console.log(`[Yields API] ${protocolId}: APY=${apy}, Pools=${pools.length}`);
       return {
