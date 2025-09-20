@@ -169,7 +169,7 @@ async function fetchProtocolData(id: string) {
           },
           tvl: uniswapData.tvl || staticConfig?.fallbackData?.tvl || 4500000000,
           chains: staticConfig?.chains || ['Ethereum', 'Polygon', 'Arbitrum', 'Optimism', 'Base'],
-          audits: staticConfig?.audits || null,
+          audits: staticConfig?.audit || null,
           pools: uniswapData.topPools,
           lastUpdated: Date.now(),
           fromCache: true
